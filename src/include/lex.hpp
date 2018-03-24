@@ -3,11 +3,8 @@
 
 #include<vector>
 #include<string>
-#include<utility>
-#include<map>
 #include<exception>
-#include<memory>
-#include<list>
+#include<unordered_map>
 #include"finite_automata.hpp"
 
 namespace parser {
@@ -21,31 +18,26 @@ namespace parser {
 
     class lex {
     public:
-        typedef int TokenIndex;
+        template<typename Iter, typename StartIter>
+        lex(Iter start, Iter end, StartIter token_start, StartIter token_end);
+
+        dfa<char> get_dfa() const;
     private:
-        friend class lex_builder;
-
-        std::map<TokenIndex, std::map<char, std::list<TokenIndex>>> grammer;
-        std::list<TokenIndex> start_points;
-        lex_builder &builder;
-        lex(lex_builder &builder_) :
-            builder(builder_) {}
-    };
-
-    class lex_builder {
-    private:
-        std::map<std::string, lex::TokenIndex> token_index;
-        std::unique_ptr<lex> ref;
-        bool is_left = true;
-
-        void parse(const std::string &item, bool left);
-        std::string parse_righter(const std::string &item);
-    public:
-        lex_builder() :
-            ref(new lex(*this)) {}
-        void set_grammer(std::vector<std::string> const &grams, bool left = true);
-        void set_start_points(std::vector<std::string> const &start_points);
-        lex get_lex();
+        typedef unsigned TokenIndex;
+        //rule_list[0] indicates nil element
+        //-1 to indicate nil
+        std::vector<std::map<int, std::vector<TokenIndex>>> rule_list;
+        std::unordered_map<std::string, TokenIndex> token_mp;
+        std::vector<TokenIndex> start_token;
+        /*
+          true: A->aB|b
+          false: A->Ba|b
+        */
+        bool left_linear = false;
+        bool parse(const std::string &str, bool check_left);
+        dfa<char> get_dfa_left() const;
+        dfa<char> get_dfa_right() const;
+        std::unordered_map<std::string, TokenIndex>::iterator find_token(const std::string &token, bool insertable = true);
     };
 }
 
