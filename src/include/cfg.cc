@@ -19,6 +19,7 @@ static std::string generate_random_string(size_t length) {
 }
 
 namespace parser {
+#ifdef DEBUG
     std::ostream &operator<<(std::ostream &os, const Token &tk) {
         if (tk.is_end()) {
             os << "<<$>>";
@@ -31,11 +32,12 @@ namespace parser {
         }
         return os;
     }
+#endif
 
     static std::string get_tmp_string(int num) {
         std::string str;
         while (--num >= 0) {
-            str.push_back('\0');
+            str.push_back('\n');
         }
         return str;
     }
@@ -148,19 +150,16 @@ namespace parser {
 
     inline Token cfg_builder::get_token(const std::string &token,
                 bool throw_when_terminal) {
-            std::pair<std::string, bool> ret;
-            if (token.front() == '\'') {
-                ret.second = true;
-                if (throw_when_terminal) {
-                    throw std::runtime_error("ERROR: " + token + "is terminal");
-                }
-                ret.first = std::string(token.begin() + 1, token.end());
+            Token ifnonterminal(token, false);
+            if (inner.nonterminal_list.find(ifnonterminal)
+                    != inner.terminal_list.end()) {
+                return ifnonterminal;
             }
-            else {
-                ret.second = false;
-                ret.first = token;
+            if (throw_when_terminal) {
+                throw std::runtime_error("ERROR: " + token + " is terminal");
             }
-            return Token(ret.first, ret.second);
+            auto iter = inner.terminal_list.insert(Token(token));
+            return *iter.first;
         }
 
     std::unordered_set<Token> cfg::get_first_set(const Token &token) const {
@@ -215,6 +214,7 @@ namespace parser {
         }
     }
 
+#ifdef DEBUG
     cfg::operator std::string() const {
         std::ostringstream os;
         for (auto rule : rule_list) {
@@ -226,4 +226,13 @@ namespace parser {
         }
         return os.str();
     }
+
+    std::ostream &operator<<(std::ostream &os, const cfg::RULE &rule) {
+        os << rule->first << " ->";
+        for (auto item : rule->second) {
+            os << ' ' << item;
+        }
+        return os;
+    }
+#endif
 }

@@ -1,5 +1,8 @@
 #include"cfg_graph.hpp"
+#include<queue>
 #include<sstream>
+#include"cfg_reduction.hpp"
+#include<iostream>
 
 namespace parser {
 #ifdef DEBUG
@@ -54,7 +57,7 @@ namespace parser {
     }
 
     bool LR_graph::Data::is_conflict() const {
-        std::map<Token, RULE> mmp;
+        std::map<Token, cfg::RULE> mmp;
         for (auto item : item_list) {
             if (item.first.dot_pos == item.first.rule->second.size()) {
                 for (auto tk : item.second) {
@@ -65,6 +68,18 @@ namespace parser {
             }
         }
         return false;
+    }
+
+    std::map<Token, cfg::RULE> LR_graph::Data::reduction_list() const {
+        std::map<Token, cfg::RULE> ret;
+        for (auto item : item_list) {
+            if (item.first.rule->second.size() > item.first.dot_pos)
+                continue;
+            for (auto tk : item.second) {
+                ret.insert({tk, item.first.rule});
+            }
+        }
+        return ret;
     }
 
 #ifdef DEBUG
@@ -186,24 +201,25 @@ namespace parser {
     }
 
     void LR_graph::build() {
-        RULE extended_rule = inner.rule_list.find(inner.extended);
+        cfg::RULE extended_rule = inner.rule_list.find(inner.extended);
         //TODO
         if (extended_rule == inner.rule_list.end()) return;
         auto first = closure(Data({{Data::Item(extended_rule, 0), {Token::get_end()}}}));
         node_type node = get_node(first);
         starter = node;
         std::queue<node_type> wait;
-        std::unordered_set<node_type> vis;
+        std::set<node_type> vis;
         wait.push(node);
         while (wait.size()) {
             node_type cur = wait.front();
             wait.pop();
             if (vis.insert(cur).second == false) continue;
+            auto iter = graph.insert({cur, {}}).first;
             auto data = *cur;
             for (auto token : data.all_next()) {
                 Data next = get_next_data(data, token);
                 auto node = get_node(next);
-                graph[cur].insert({token, node});
+                iter->second.insert({token, node});
                 wait.push(node);
             }
         }
@@ -219,6 +235,10 @@ namespace parser {
             }
         }
         return false;
+    }
+
+    LR_reduction LR_graph::get_reduction_table() const {
+        return LR_reduction(*this);
     }
 
 #ifdef DEBUG

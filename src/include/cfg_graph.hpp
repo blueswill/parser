@@ -3,21 +3,20 @@
 
 #include<initializer_list>
 #include<set>
+#include<map>
 #include"forward.hpp"
-#include"automata.hpp"
 #include"cfg.hpp"
 
 namespace parser {
     class LR_graph {
     private:
         cfg inner;
-        typedef decltype(inner.rule_list.cbegin()) RULE;
     public:
         struct Data {
             struct Item {
-                RULE rule;
+                cfg::RULE rule;
                 size_t dot_pos;
-                Item(RULE rule, size_t pos) :
+                Item(cfg::RULE rule, size_t pos) :
                     rule(rule), dot_pos(pos) {}
                 Item() {}
                 friend bool operator==(const Item &i1, const Item &i2) {
@@ -53,7 +52,7 @@ namespace parser {
             }
 
             bool is_conflict() const;
-
+            std::map<Token, cfg::RULE> reduction_list() const;
 #ifdef DEBUG
             explicit operator std::string() const;
 #endif
@@ -88,6 +87,7 @@ namespace parser {
         }
 
         bool is_conflict(Data *data = nullptr) const;
+        LR_reduction get_reduction_table() const;
 
 #ifdef DEBUG
         explicit operator std::string() const;

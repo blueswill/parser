@@ -34,7 +34,9 @@ namespace parser {
         friend class CFG;
         friend struct std::hash<Token>;
 
+#ifdef DEBUG
         friend std::ostream &operator<<(std::ostream &os, const Token &tk);
+#endif
         friend bool operator<(const Token &t1, const Token &t2) {
             return t1.name < t2.name || (t1.name == t2.name && t1.type < t2.type);
         }
@@ -78,6 +80,7 @@ namespace parser {
         friend class LR_graph;
         friend class cfg_reduction;
     public:
+        typedef decltype(rule_list.cbegin()) RULE;
         //string pointer can't be exposed to user
         std::unordered_set<Token> get_first_set(const Token &tk) const;
 
@@ -89,7 +92,10 @@ namespace parser {
         }
         inline bool contain(const Token &token) const;
         LR_graph get_LR_graph() const;
+#ifdef DEBUG
         explicit operator std::string() const;
+#endif
+        inline Token get_extended_token() const { return extended; }
     };
 
     class cfg_builder {
@@ -101,7 +107,7 @@ namespace parser {
         void add_nonterminal(const std::vector<std::string> &lst);
 
         //{token_name, is_terminal}
-        static Token get_token(const std::string &token,  bool throw_when_terminal = false);
+        Token get_token(const std::string &token,  bool throw_when_terminal = false);
     public:
         cfg_builder() = default;
         bool add_rule(const Token &head, const std::vector<Token> &body);
@@ -112,6 +118,10 @@ namespace parser {
     };
 
     std::istream& operator>>(std::istream &is, cfg_builder &builder);
+
+#ifdef DEBUG
+    std::ostream &operator<<(std::ostream &os, const cfg::RULE &rule);
+#endif
 }
 
 #endif
