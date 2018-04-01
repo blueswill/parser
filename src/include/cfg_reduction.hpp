@@ -41,11 +41,23 @@ namespace parser {
         reduction_type next_state(const state_type &state, const Token &tk);
 #ifdef DEBUG
         explicit operator std::string() const;
+        std::string generate_code();
+        bool conflict() { return contain_conflict; }
 #endif
     private:
         std::unordered_map<state_type, std::unordered_map<Token, reduction_type>> table;
         std::map<state_type, LR_graph::node_type> meta;
         state_type init;
+        //移进归约冲突
+        bool contain_conflict = false;
+
+#ifdef DEBUG
+        std::map<Token, std::vector<std::pair<state_type, reduction_type>>> g_meta;
+        std::map<Token, size_t> non_terminal_list;
+        std::map<size_t, std::vector<std::pair<state_type, state_type>>> goto_table;
+#endif
+        //save rule index
+        std::map<cfg::RULE, size_t> rule_mp;
 
         LR_reduction(const LR_graph &graph);
     };

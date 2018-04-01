@@ -50,12 +50,11 @@ namespace parser {
     typedef basic_regex_token<char> regex_token;
     typedef basic_regex_token<wchar_t> regex_wtoken; //TODO for unicode parser
 
-    template<typename T>
     class lexer_graph {
     public:
         class node {
         private:
-            std::vector<std::pair<basic_regex_token<T>, node*>> trans;
+            std::vector<std::pair<basic_regex_token<char>, node*>> trans;
             std::vector<node*> nils;
         public:
             std::vector<node*> get_nils() const {
@@ -64,7 +63,7 @@ namespace parser {
             void add_connection(node *n) {
                 nils.push_back(n);
             }
-            void add_connection(node *n, basic_regex_token<T> tk) {
+            void add_connection(node *n, basic_regex_token<char> tk) {
                 trans.push_back({std::move(tk), n});
             }
             void reverse() {
@@ -80,12 +79,13 @@ namespace parser {
         node_type _end = nullptr;
     public:
         lexer_graph() = default;
-        lexer_graph(lexer_graph<T> &&graph) :
-            _meta(graph._meta), _start(graph._start), _end(graph._end) {}
-        lexer_graph<char> &operator=(lexer_graph<char> &&graph) {
+        lexer_graph(lexer_graph &&graph) :
+            _meta(std::move(graph._meta)), _start(graph._start), _end(graph._end) {}
+        lexer_graph &operator=(lexer_graph &&graph) {
             _meta = std::move(graph._meta);
             _start = std::move(graph._start);
             _end = std::move(graph._end);
+            return *this;
         }
         node_type get_start() {
             return _start ? _start : (_start = get_new_node());
@@ -97,14 +97,13 @@ namespace parser {
             auto iter = _meta.insert(make_unique<node>());
             return iter.first->get();
         }
-        void combine(lexer_graph<T> &&graph) {
-            _meta.insert(graph._meta.begin(), graph._meta.end());
-            graph._meta.clear();
+        void combine(lexer_graph &&graph) {
+            _meta.merge(std::move(graph._meta));
         }
-        friend lexer_graph<T> regex_parse(const lexer &_lexer);
+        friend lexer_graph regex_parse(const lexer &_lexer);
     };
 
-    lexer_graph<char> regex_parse(const lexer &_lexer);
+    lexer_graph regex_parse(const lexer &_lexer);
 }
 
 #endif

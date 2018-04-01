@@ -24,9 +24,6 @@ namespace parser {
         if (tk.is_end()) {
             os << "<<$>>";
         }
-        else if (tk.is_null()) {
-            os << "<<null>>";
-        }
         else {
             os << tk.name;
         }
@@ -235,4 +232,13 @@ namespace parser {
         return os;
     }
 #endif
+    bool operator<(const cfg::RULE &r1, const cfg::RULE &r2) {
+        if (!(r1->first == r2->first)) return r1->first < r2->first;
+        for (auto i = 0u; i < r1->second.size(); ++i) {
+            if (i == r2->second.size()) return true;
+            if (!(r1->second[i] == r2->second[i])) return r1->second[i] < r2->second[i];
+        }
+        return false;
+    }
+
 }

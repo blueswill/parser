@@ -90,6 +90,13 @@ namespace parser {
         inline std::unordered_set<Token> get_nonterminal_tokens() const {
             return nonterminal_list;
         }
+        std::vector<RULE> get_rules() const {
+            std::vector<RULE> ret;
+            for (auto iter = rule_list.cbegin(); iter != rule_list.cend(); ++iter) {
+                ret.push_back(iter);
+            }
+            return ret;
+        }
         inline bool contain(const Token &token) const;
         LR_graph get_LR_graph() const;
 #ifdef DEBUG
@@ -108,16 +115,18 @@ namespace parser {
 
         //{token_name, is_terminal}
         Token get_token(const std::string &token,  bool throw_when_terminal = false);
-    public:
-        cfg_builder() = default;
         bool add_rule(const Token &head, const std::vector<Token> &body);
         bool add_empty_rule(const Token &token);
+    public:
+        cfg_builder() = default;
         cfg get_cfg();
 
         friend std::istream& operator>>(std::istream &is, cfg_builder &builder);
     };
 
     std::istream& operator>>(std::istream &is, cfg_builder &builder);
+
+    bool operator<(const cfg::RULE &r1, const cfg::RULE &r2);
 
 #ifdef DEBUG
     std::ostream &operator<<(std::ostream &os, const cfg::RULE &rule);

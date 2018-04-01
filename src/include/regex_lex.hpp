@@ -3,6 +3,7 @@
 
 #include<string>
 #include<stdexcept>
+#include<deque>
 
 /* regular expression lexer
  */
@@ -61,11 +62,10 @@ namespace parser {
             read_next();
         }
 
-        lexer_token get() const { return cur_token; }
         lexer_token consume() {
-            auto cur = cur_token;
+            auto ret = cur_token;
             read_next();
-            return cur;
+            return ret;
         }
     };
 }

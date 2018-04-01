@@ -9,6 +9,8 @@ int main () {
     parser::cfg_builder builder;
     std::cin >> builder;
     //std::cout << std::string(builder.get_cfg()) << std::endl;
-    std::cout << std::string(builder.get_cfg().get_LR_graph().get_reduction_table());
+    auto graph = builder.get_cfg().get_LR_graph();
+    auto table = graph.get_reduction_table();
+    std::cout << table.generate_code() << std::endl;
     return 0;
 }
