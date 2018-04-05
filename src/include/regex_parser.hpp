@@ -3,10 +3,14 @@
 
 #include<utility>
 #include<functional>
-#include<vector>
+#include<set>
 #include<unordered_set>
 #include"regex_lex.hpp"
 #include"utility.hpp"
+
+#ifdef DEBUG
+#include<iostream>
+#endif
 
 namespace parser {
     template<typename T, typename Less = std::less<T>>
@@ -14,20 +18,45 @@ namespace parser {
         public:
             enum MODE { DIRECT, INVERSE };
         private:
-            enum TYPE { ANY, SINGLE, REGION };
+            struct unit {
+                enum UNIT_TYPE { SINGLE, PAIR };
+                UNIT_TYPE type;
+                std::pair<T, T> region;
+                Less less;
+
+                unit(const T &t1, const T &t2, Less less) : type(PAIR), region({t1, t2}), less(less) {}
+                unit(const T &t, Less less) : type(SINGLE), region({t, T()}), less(less) {}
+
+                bool is_single() { return type == SINGLE; }
+                friend bool operator<(const unit &u1, const unit &u2) {
+                    if (u1.type != u2.type) return u1.type < u2.type;
+                    bool flag = u1.less(u1.rgion.first, u2.region.first);
+                    if (u1.type == SINGLE || flag) return flag;
+                    return u1.less(u1.region.second, u2.region.second);
+                }
+            };
+
+            enum TYPE { ANY, SET};
             TYPE type;
             MODE mode;
 
-            T single;
-            std::pair<T, T> region;
+            std::set<unit> set;
             Less less;
+
+            bool item_equal(const T &t1, const T &t2) {
+                return (!less(t1, t2) && !less(t2, t1));
+            }
+            
+            bool item_in_region(const T &t1, const T &t2, const T &target) {
+                return (!less(target, t1) && !less(t2, target));
+            }
 
         public:
             basic_regex_token(T ch, MODE mode = DIRECT, Less less = Less()) :
-                type(SINGLE), mode(mode), single(std::move(ch)), less(std::move(less)) {}
+                type(SET), mode(mode), set({unit(std::move(ch), less)}), less(less) {}
 
             basic_regex_token(T ch1, T ch2, MODE mode = DIRECT, Less less = Less()) :
-                type(REGION), mode(mode), region(std::move(ch1), std::move(ch2)), less(std::move(less)) {}
+                type(SET), mode(mode), set({unit(std::move(ch1), std::move(ch2), less)}), less(less) {}
             //refuse anything is not a good idea
             basic_regex_token(MODE mode = DIRECT, Less less = Less()) :
                 type(ANY), mode(mode), less(std::move(less)) {}
@@ -39,12 +68,61 @@ namespace parser {
             inline bool match(const T &ch) const {
                 bool m = false;
                 switch (type) {
-                    case ANY: m = true; break;
-                    case SINGLE: m = (!less(ch, single) && !less(single, ch)); break;
-                    case REGION: m = (!less(ch, region.first) && !less(region.second, ch)); break;
+                    case ANY:
+                        m = true; break;
+                    case SET:
+                        {
+                            for (auto item : set) {
+                                switch (item.is_single()) {
+                                    case true: m = item_equal(item.region.first, ch); break;
+                                    case false: m = item_in_region(item.region.first, item.region.second, ch); break;
+                                }
+                                if (m) break;
+                            }
+                            break;
+                        }
                 }
                 return mode == DIRECT ? m : !m;
             }
+
+            void add_set(const T &ch) {
+                if (type != SET) throw std::runtime_error("expected SET property");
+                set.insert(ch);
+            }
+
+            void add_set(const T &t1, const T &t2) {
+                if (type != SET) throw std::runtime_error("expected SET property");
+                set.insert(unit(t1, t2));
+            }
+
+            friend bool operator<(const basic_regex_token<T, Less> &t1, const basic_regex_token<T, Less> &t2) {
+                if (t1.mode != t2.mode) return t1.mode < t2.mode;
+                if (t1.type != t2.type) return t1.type < t2.type;
+                return t1.set < t2.set;
+            }
+
+#ifdef DEBUG
+            friend std::ostream &operator<<(std::ostream &os, const basic_regex_token<T, Less> &tk) {
+                switch (tk.type) {
+                    case basic_regex_token<T, Less>::SET:
+                        {
+                            if (tk.mode == basic_regex_token<T, Less>::DIRECT) os << '[';
+                            else os << "[^";
+                            for (auto item : tk.set) {
+                                switch (item.is_single()) {
+                                    case true: os << item.region.first; break;
+                                    case false: os << item.region.first << '-' << item.region.second; break;
+                                }
+                            }
+                            os << ']';
+                            break;
+                        }
+                    case basic_regex_token<T, Less>::ANY:
+                        os << '.'; break;
+                }
+                return os;
+            }
+#endif
     };
 
     typedef basic_regex_token<char> regex_token;
@@ -56,8 +134,9 @@ namespace parser {
         private:
             std::vector<std::pair<basic_regex_token<char>, node*>> trans;
             std::vector<node*> nils;
+            friend class lexer_graph;
         public:
-            std::vector<node*> get_nils() const {
+            const std::vector<node*> &get_nils() const {
                 return nils;
             }
             void add_connection(node *n) {
@@ -71,12 +150,24 @@ namespace parser {
                     item.first.reverse();
                 }
             }
+
+            template<typename Inserter>
+            void match(char c, Inserter inserter) {
+                for (auto item : trans) {
+                    if (item.first.match(c)) *inserter++ = item.second;
+                }
+            }
+
+            const std::vector<std::pair<basic_regex_token<char>, node*>> &get_transforms() const {
+                return trans;
+            }
         };
         typedef node *node_type;
     private:
         std::unordered_set<unique_ptr<node>> _meta;
         node_type _start = nullptr;
         node_type _end = nullptr;
+
     public:
         lexer_graph() = default;
         lexer_graph(lexer_graph &&graph) :
@@ -100,10 +191,34 @@ namespace parser {
         void combine(lexer_graph &&graph) {
             _meta.merge(std::move(graph._meta));
         }
+
+        bool is_single_connection(bool throwable = false) {
+            return _meta.size() == 2 && _start && _end && _start->trans.size() == 1;
+            if (throwable) throw std::runtime_error("expected single connection graph");
+        }
+
+        void add_set(char ch) {
+            is_single_connection(true);
+            _start->trans.front().first.add_set(ch);
+        }
+
+        void add_set(char c1, char c2) {
+            is_single_connection(true);
+            _start->trans.front().first.add_set(c1, c2);
+        }
+
+        void inverse() {
+            is_single_connection(true);
+            _start->trans.front().first.reverse();
+        }
+#ifdef DEBUG
+        friend std::ostream &operator<<(std::ostream &os, const lexer_graph &graph);
+#endif
+
         friend lexer_graph regex_parse(const lexer &_lexer);
     };
 
-    lexer_graph regex_parse(const lexer &_lexer);
+    lexer_graph regex_parse(lexer &_lexer);
 }
 
 #endif

@@ -150,6 +150,7 @@ namespace parser {
             os << ";\nbreak;\n";
             os << "}\n";
         }
+        os << "default: throw std::runtime_error(\"unexpected index \" + std::to_string(index));\n";
         os << "}\n";
         os << "if (!notdo) {\n";
         os << "switch (index) {\n";
@@ -174,8 +175,11 @@ namespace parser {
                 os << "}\n";
             }
             os << "}\n";
+            os << "break;\n";
             os << "}\n";
         }
+        os << "default: throw std::runtime_error(\"unexpected non-terminal index \""
+            " + std::to_string(current.non_terminal_index));\n";
         os << "}\n";
         os << "generator.consume();\n";
         os << "continue;\n";
@@ -199,7 +203,7 @@ namespace parser {
                         {
                             auto size = action.second.info.reduction.rule->second.size();
                             os << "std::list<Props> tmp;\n";
-                            //TODO if there is some empty rules, this code is wrong
+                            //TODO if there is some empty rules, following code is wrong
                             os << "for (auto i = 0; i < " << size << "; ++i) {\n";
                             os << "auto &item = props_stack.top();\n";
                             os << "tmp.push_front(std::move(item));\n";
@@ -225,7 +229,9 @@ namespace parser {
                 os << "break;\n";
                 os << "}\n";
             }
+            os << "default: throw std::runtime_error(\"unexpected state type \" + std::to_string(state_stack.top()));\n";
             os << "}\n";
+            os << "break;\n";
             os << "}\n";
         }
         os << "}\n";

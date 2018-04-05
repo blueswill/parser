@@ -100,7 +100,7 @@ namespace parser {
     }
 #endif
 }
-
+/*
 #ifdef DEBUG
 #include<iostream>
 int main(int argc, char **argv) {
@@ -116,3 +116,4 @@ int main(int argc, char **argv) {
 }
 #endif
 
+*/

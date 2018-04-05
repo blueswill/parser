@@ -11,7 +11,8 @@ namespace parser {
         TYPE type;
         lexer_token token;
         size_t non_terminal_index;
-        lexer_graph graph;
+        regex_token set_tk;
+        lexer_graph graph; //sym property
 
         Props(lexer_token token) :
             type(TOKEN), token(token) {}
@@ -44,11 +45,10 @@ namespace parser {
             }
     };
 
-#ifdef DEBUG
     void Assert(size_t index, const std::vector<Props> &lst) {
         bool notdo = true;
         switch (index) {
-            case 8:
+            case 7:
                 {
                     notdo =
                         (lst.size() == 3) &&
@@ -57,14 +57,14 @@ namespace parser {
                         (!lst[2].is_token() && lst[2].non_terminal_index == 2);
                     break;
                 }
-            case 7:
+            case 6:
                 {
                     notdo =
                         (lst.size() == 1) &&
                         (!lst[0].is_token() && lst[0].non_terminal_index == 2);
                     break;
                 }
-            case 12:
+            case 13:
                 {
                     notdo =
                         (lst.size() == 3) &&
@@ -73,7 +73,7 @@ namespace parser {
                         (lst[2].is_token() && lst[2].token.type == lexer_token::RIGHT_P);
                     break;
                 }
-            case 9:
+            case 11:
                 {
                     notdo =
                         (lst.size() == 1) &&
@@ -89,44 +89,48 @@ namespace parser {
                         (lst[2].is_token() && lst[2].token.type == lexer_token::RIGHT_B);
                     break;
                 }
-            case 11:
+            case 9:
+                {
+                    notdo =
+                        (lst.size() == 4) &&
+                        (lst[0].is_token() && lst[0].token.type == lexer_token::LEFT_B) &&
+                        (lst[1].is_token() && lst[1].token.type == lexer_token::NOT) &&
+                        (!lst[2].is_token() && lst[2].non_terminal_index == 5) &&
+                        (lst[3].is_token() && lst[3].token.type == lexer_token::RIGHT_B);
+                    break;
+                }
+            case 12:
                 {
                     notdo =
                         (lst.size() == 1) &&
                         (lst[0].is_token() && lst[0].token.type == lexer_token::CHAR);
                     break;
                 }
-            case 13:
-                {
-                    notdo =
-                        (lst.size() == 1) &&
-                        (!lst[0].is_token() && lst[0].non_terminal_index == 6);
-                    break;
-                }
-            case 14:
-                {
-                    notdo =
-                        (lst.size() == 2) &&
-                        (lst[0].is_token() && lst[0].token.type == lexer_token::NOT) &&
-                        (!lst[1].is_token() && lst[1].non_terminal_index == 6);
-                    break;
-                }
             case 16:
                 {
                     notdo =
                         (lst.size() == 4) &&
-                        (lst[0].is_token() && lst[0].token.type == lexer_token::CHAR) &&
-                        (lst[1].is_token() && lst[1].token.type == lexer_token::REGION) &&
-                        (lst[2].is_token() && lst[2].token.type == lexer_token::CHAR) &&
-                        (!lst[3].is_token() && lst[3].non_terminal_index == 6);
+                        (!lst[0].is_token() && lst[0].non_terminal_index == 5) &&
+                        (lst[1].is_token() && lst[1].token.type == lexer_token::CHAR) &&
+                        (lst[2].is_token() && lst[2].token.type == lexer_token::REGION) &&
+                        (lst[3].is_token() && lst[3].token.type == lexer_token::CHAR);
                     break;
                 }
             case 17:
                 {
                     notdo =
                         (lst.size() == 2) &&
+                        (!lst[0].is_token() && lst[0].non_terminal_index == 5) &&
+                        (lst[1].is_token() && lst[1].token.type == lexer_token::CHAR);
+                    break;
+                }
+            case 14:
+                {
+                    notdo =
+                        (lst.size() == 3) &&
                         (lst[0].is_token() && lst[0].token.type == lexer_token::CHAR) &&
-                        (!lst[1].is_token() && lst[1].non_terminal_index == 6);
+                        (lst[1].is_token() && lst[1].token.type == lexer_token::REGION) &&
+                        (lst[2].is_token() && lst[2].token.type == lexer_token::CHAR);
                     break;
                 }
             case 15:
@@ -136,38 +140,38 @@ namespace parser {
                         (lst[0].is_token() && lst[0].token.type == lexer_token::CHAR);
                     break;
                 }
-            case 4:
-                {
-                    notdo =
-                        (lst.size() == 2) &&
-                        (!lst[0].is_token() && lst[0].non_terminal_index == 4) &&
-                        (lst[1].is_token() && lst[1].token.type == lexer_token::ZERO_MORE);
-                    break;
-                }
-            case 3:
-                {
-                    notdo =
-                        (lst.size() == 2) &&
-                        (!lst[0].is_token() && lst[0].non_terminal_index == 4) &&
-                        (lst[1].is_token() && lst[1].token.type == lexer_token::ONE_MORE);
-                    break;
-                }
-            case 2:
-                {
-                    notdo =
-                        (lst.size() == 2) &&
-                        (!lst[0].is_token() && lst[0].non_terminal_index == 4) &&
-                        (lst[1].is_token() && lst[1].token.type == lexer_token::ZERO_ONE);
-                    break;
-                }
-            case 1:
+            case 0:
                 {
                     notdo =
                         (lst.size() == 1) &&
                         (!lst[0].is_token() && lst[0].non_terminal_index == 4);
                     break;
                 }
-            case 6:
+            case 3:
+                {
+                    notdo =
+                        (lst.size() == 2) &&
+                        (!lst[0].is_token() && lst[0].non_terminal_index == 3) &&
+                        (lst[1].is_token() && lst[1].token.type == lexer_token::ZERO_MORE);
+                    break;
+                }
+            case 2:
+                {
+                    notdo =
+                        (lst.size() == 2) &&
+                        (!lst[0].is_token() && lst[0].non_terminal_index == 3) &&
+                        (lst[1].is_token() && lst[1].token.type == lexer_token::ONE_MORE);
+                    break;
+                }
+            case 1:
+                {
+                    notdo =
+                        (lst.size() == 2) &&
+                        (!lst[0].is_token() && lst[0].non_terminal_index == 3) &&
+                        (lst[1].is_token() && lst[1].token.type == lexer_token::ZERO_ONE);
+                    break;
+                }
+            case 5:
                 {
                     notdo =
                         (lst.size() == 2) &&
@@ -175,52 +179,51 @@ namespace parser {
                         (!lst[1].is_token() && lst[1].non_terminal_index == 2);
                     break;
                 }
-            case 5:
+            case 4:
                 {
                     notdo =
                         (lst.size() == 1) &&
                         (!lst[0].is_token() && lst[0].non_terminal_index == 3);
                     break;
                 }
-            case 0:
+            case 8:
                 {
                     notdo =
                         (lst.size() == 1) &&
                         (!lst[0].is_token() && lst[0].non_terminal_index == 1);
                     break;
                 }
+            default: throw std::runtime_error("unexpected index " + std::to_string(index));
         }
         if (!notdo) {
             switch (index) {
-                case 0: throw std::runtime_error("<<extender>> -> E error");
-                case 1: throw std::runtime_error("M -> F error");
-                case 2: throw std::runtime_error("M -> F ? error");
-                case 3: throw std::runtime_error("M -> F + error");
-                case 4: throw std::runtime_error("M -> F * error");
-                case 5: throw std::runtime_error("T -> M error");
-                case 6: throw std::runtime_error("T -> M T error");
-                case 7: throw std::runtime_error("E -> T error");
-                case 8: throw std::runtime_error("E -> E | T error");
-                case 9: throw std::runtime_error("F -> . error");
+                case 7: throw std::runtime_error("E -> E | T error");
+                case 6: throw std::runtime_error("E -> T error");
+                case 13: throw std::runtime_error("F -> ( E ) error");
+                case 11: throw std::runtime_error("F -> . error");
                 case 10: throw std::runtime_error("F -> [ K ] error");
-                case 11: throw std::runtime_error("F -> c error");
-                case 12: throw std::runtime_error("F -> ( E ) error");
-                case 13: throw std::runtime_error("K -> K' error");
-                case 14: throw std::runtime_error("K -> ^ K' error");
-                case 15: throw std::runtime_error("K' -> c error");
-                case 16: throw std::runtime_error("K' -> c - c K' error");
-                case 17: throw std::runtime_error("K' -> c K' error");
+                case 9: throw std::runtime_error("F -> [ ^ K ] error");
+                case 12: throw std::runtime_error("F -> c error");
+                case 16: throw std::runtime_error("K -> K c - c error");
+                case 17: throw std::runtime_error("K -> K c error");
+                case 14: throw std::runtime_error("K -> c - c error");
+                case 15: throw std::runtime_error("K -> c error");
+                case 0: throw std::runtime_error("M -> F error");
+                case 3: throw std::runtime_error("M -> M * error");
+                case 2: throw std::runtime_error("M -> M + error");
+                case 1: throw std::runtime_error("M -> M ? error");
+                case 5: throw std::runtime_error("T -> M T error");
+                case 4: throw std::runtime_error("T -> M error");
+                case 8: throw std::runtime_error("mqkS1 -> E error");
             }
         }
     }
-#endif
-    lexer_graph reduction(size_t number, std::vector<Props> &&lst) {
-#ifdef DEBUG
+
+    static lexer_graph reduction(size_t number, std::vector<Props> &&lst) {
         Assert(number, lst);
-#endif
         switch (number) {
             // E -> E | T
-            case 8:
+            case 7:
                 {
                     lexer_graph ret(std::move(lst.front().graph));
                     auto ast = lst.back().graph.get_start(), aed = lst.back().graph.get_end();
@@ -230,101 +233,107 @@ namespace parser {
                     ret.combine(std::move(lst.back().graph));
                     return ret;
                 }
+                // M -> F
+            case 0:
+                // T -> M
+            case 4:
                 // E -> T
-            case 7:
-                // F -> ( E )
-            case 12:
+            case 6:
+                // extended -> E
+            case 8: return std::move(lst.front().graph);
                 // F -> [ K ]
             case 10:
-                // K -> K'
-            case 13:
-                // M -> F
-            case 1:
-                // T -> M
+                // F -> ( E )
+            case 13: return std::move(lst[1].graph);
+                     // T -> M T
             case 5:
-                // extended -> E
-            case 0: return std::move(lst.front().graph);
-                    // T -> M T
-            case 6:
-                    {
-                        lexer_graph ret(std::move(lst.front().graph));
-                        auto ed = ret.get_end();
-                        ed->add_connection(lst.back().graph.get_start());
-                        ret.combine(std::move(lst.back().graph));
-                        return ret;
-                    }
-                    // M -> F *
-            case 4:
-                    {
-                        lexer_graph ret(std::move(lst.front().graph));
-                        auto st = ret.get_start(), ed = ret.get_end();
-                        st->add_connection(ed);
-                        ed->add_connection(st);
-                        return ret;
-                    }
-                    // M -> F +
+                     {
+                         lexer_graph ret(std::move(lst.front().graph));
+                         auto ed = ret.get_end();
+                         ed->add_connection(lst.back().graph.get_start());
+                         ret.combine(std::move(lst.back().graph));
+                         return ret;
+                     }
+                     // M -> M *
             case 3:
-                    {
-                        lexer_graph ret(std::move(lst.front().graph));
-                        ret.get_end()->add_connection(ret.get_start());
-                        return ret;
-                    }
-                    // M -> F ?
+                     {
+                         lexer_graph ret(std::move(lst.front().graph));
+                         auto st = ret.get_start(), ed = ret.get_end();
+                         st->add_connection(ed);
+                         ed->add_connection(st);
+                         return ret;
+                     }
+                     // M -> M +
             case 2:
-                    {
-                        lexer_graph ret(std::move(lst.front().graph));
-                        ret.get_start()->add_connection(ret.get_end());
-                        return ret;
-                    }
-                    // F -> c
+                     {
+                         lexer_graph ret(std::move(lst.front().graph));
+                         ret.get_end()->add_connection(ret.get_start());
+                         return ret;
+                     }
+                     // M -> M ?
+            case 1:
+                     {
+                         lexer_graph ret(std::move(lst.front().graph));
+                         ret.get_start()->add_connection(ret.get_end());
+                         return ret;
+                     }
+                     // F -> c
+            case 12:
+                     {
+                         lexer_graph ret;
+                         auto st = ret.get_start();
+                         auto ed = ret.get_end();
+                         st->add_connection(ed, regex_token(lst[0].token.ch));
+                         return ret;
+                     }
+                     // F -> .
             case 11:
-                    {
-                        lexer_graph ret;
-                        auto st = ret.get_start();
-                        auto ed = ret.get_end();
-                        st->add_connection(ed, regex_token(lst[0].token.ch));
-                        return ret;
-                    }
-                    // F -> .
-            case 9:
-                    {
-                        lexer_graph ret;
-                        auto st = ret.get_start();
-                        auto ed = ret.get_end();
-                        st->add_connection(ed, regex_token());
-                        return ret;
-                    }
-                    // K -> ^ K'
+                     {
+                         lexer_graph ret;
+                         auto st = ret.get_start();
+                         auto ed = ret.get_end();
+                         st->add_connection(ed, regex_token());
+                         return ret;
+                     }
+                     // K -> c - c
             case 14:
-                    {
-                        auto ret = std::move(lst[1].graph);
-                        ret.get_start()->reverse();
-                        return ret;
-                    }
-                    // K' -> c K'
-            case 17:
-                    {
-                        auto ret = std::move(lst[1].graph);
-                        ret.get_start()->add_connection(ret.get_end(), regex_token(lst[0].token.ch));
-                        return ret;
-                    }
-                    // K' -> c - c K'
-            case 16:
-                    {
-                        auto ret = std::move(lst[3].graph);
-                        ret.get_start()->add_connection(ret.get_end(), regex_token(lst[0].token.ch, lst[2].token.ch));
-                        return ret;
-                    }
-                    // K' -> c
+                     {
+                         lexer_graph ret;
+                         ret.get_start()->add_connection(ret.get_end(),
+                                 regex_token(lst[0].token.ch, lst[2].token.ch));
+                         return ret;
+                     }
+                     // K -> c
             case 15:
-                    {
-                        lexer_graph ret;
-                        ret.get_start()->add_connection(ret.get_end(), regex_token(lst[0].token.ch));
-                        return ret;
-                    }
+                     {
+                         lexer_graph ret;
+                         ret.get_start()->add_connection(ret.get_end(), regex_token(lst[0].token.ch));
+                         return ret;
+                     }
+                     // K -> K c - c
+            case 16:
+                     {
+                         lexer_graph ret(std::move(lst[0].graph));
+                         ret.add_set(lst[1].token.ch, lst[3].token.ch);
+                         return ret;
+                     }
+                     // K -> K c
+            case 17:
+                     {
+                         lexer_graph ret(std::move(lst[0].graph));
+                         ret.add_set(lst[1].token.ch);
+                         return ret;
+                     }
+                     // F -> [ ^ K ]
+            case 9:
+                     {
+                         lexer_graph ret(std::move(lst[2].graph));
+                         ret.inverse();
+                         return ret;
+                     }
             default:
-                    throw std::runtime_error("unknown producer " + std::to_string(number));
-                    break;
+                     throw std::runtime_error("unknown producer " + std::to_string(number));
+                     break;
         }
     }
 
@@ -333,6 +342,7 @@ namespace parser {
         std::stack<Props> props_stack;
         std::stack<int> state_stack;
         typedef std::list<Props>::iterator iter_t;
+        state_stack.push(0);
         for (;;) {
             auto &current = generator.get();
             if (!current.is_token()) {
@@ -354,11 +364,12 @@ namespace parser {
                                     }
                                 case 9:
                                     {
-                                        state_stack.push(27);
+                                        state_stack.push(25);
                                         props_stack.push(std::move(current));
                                         break;
                                     }
                             }
+                            break;
                         }
                     case 2:
                         {
@@ -377,7 +388,7 @@ namespace parser {
                                     }
                                 case 5:
                                     {
-                                        state_stack.push(22);
+                                        state_stack.push(21);
                                         props_stack.push(std::move(current));
                                         break;
                                     }
@@ -389,23 +400,42 @@ namespace parser {
                                     }
                                 case 13:
                                     {
-                                        state_stack.push(34);
+                                        state_stack.push(32);
                                         props_stack.push(std::move(current));
                                         break;
                                     }
                                 case 17:
                                     {
-                                        state_stack.push(37);
+                                        state_stack.push(36);
                                         props_stack.push(std::move(current));
                                         break;
                                     }
-                                case 29:
+                                case 27:
                                     {
-                                        state_stack.push(45);
+                                        state_stack.push(43);
+                                        props_stack.push(std::move(current));
+                                        break;
+                                    }
+                                case 31:
+                                    {
+                                        state_stack.push(32);
+                                        props_stack.push(std::move(current));
+                                        break;
+                                    }
+                                case 35:
+                                    {
+                                        state_stack.push(21);
+                                        props_stack.push(std::move(current));
+                                        break;
+                                    }
+                                case 42:
+                                    {
+                                        state_stack.push(32);
                                         props_stack.push(std::move(current));
                                         break;
                                     }
                             }
+                            break;
                         }
                     case 3:
                         {
@@ -436,23 +466,42 @@ namespace parser {
                                     }
                                 case 13:
                                     {
-                                        state_stack.push(13);
+                                        state_stack.push(31);
                                         props_stack.push(std::move(current));
                                         break;
                                     }
                                 case 17:
                                     {
+                                        state_stack.push(35);
+                                        props_stack.push(std::move(current));
+                                        break;
+                                    }
+                                case 27:
+                                    {
+                                        state_stack.push(42);
+                                        props_stack.push(std::move(current));
+                                        break;
+                                    }
+                                case 31:
+                                    {
+                                        state_stack.push(31);
+                                        props_stack.push(std::move(current));
+                                        break;
+                                    }
+                                case 35:
+                                    {
                                         state_stack.push(5);
                                         props_stack.push(std::move(current));
                                         break;
                                     }
-                                case 29:
+                                case 42:
                                     {
-                                        state_stack.push(13);
+                                        state_stack.push(31);
                                         props_stack.push(std::move(current));
                                         break;
                                     }
                             }
+                            break;
                         }
                     case 4:
                         {
@@ -471,7 +520,7 @@ namespace parser {
                                     }
                                 case 5:
                                     {
-                                        state_stack.push(21);
+                                        state_stack.push(4);
                                         props_stack.push(std::move(current));
                                         break;
                                     }
@@ -483,88 +532,74 @@ namespace parser {
                                     }
                                 case 13:
                                     {
-                                        state_stack.push(33);
+                                        state_stack.push(12);
                                         props_stack.push(std::move(current));
                                         break;
                                     }
                                 case 17:
                                     {
-                                        state_stack.push(36);
+                                        state_stack.push(4);
                                         props_stack.push(std::move(current));
                                         break;
                                     }
-                                case 29:
+                                case 27:
                                     {
-                                        state_stack.push(44);
+                                        state_stack.push(12);
+                                        props_stack.push(std::move(current));
+                                        break;
+                                    }
+                                case 31:
+                                    {
+                                        state_stack.push(12);
+                                        props_stack.push(std::move(current));
+                                        break;
+                                    }
+                                case 35:
+                                    {
+                                        state_stack.push(4);
+                                        props_stack.push(std::move(current));
+                                        break;
+                                    }
+                                case 42:
+                                    {
+                                        state_stack.push(12);
                                         props_stack.push(std::move(current));
                                         break;
                                     }
                             }
+                            break;
                         }
                     case 5:
                         {
                             switch(state_stack.top()) {
                                 case 7:
                                     {
-                                        state_stack.push(23);
+                                        state_stack.push(22);
                                         props_stack.push(std::move(current));
                                         break;
                                     }
                                 case 15:
                                     {
-                                        state_stack.push(35);
+                                        state_stack.push(33);
                                         props_stack.push(std::move(current));
                                         break;
                                     }
-                            }
-                        }
-                    case 6:
-                        {
-                            switch(state_stack.top()) {
-                                case 7:
-                                    {
-                                        state_stack.push(24);
-                                        props_stack.push(std::move(current));
-                                        break;
-                                    }
-                                case 15:
-                                    {
-                                        state_stack.push(24);
-                                        props_stack.push(std::move(current));
-                                        break;
-                                    }
-                                case 25:
+                                case 23:
                                     {
                                         state_stack.push(39);
                                         props_stack.push(std::move(current));
                                         break;
                                     }
-                                case 26:
+                                case 34:
                                     {
-                                        state_stack.push(42);
-                                        props_stack.push(std::move(current));
-                                        break;
-                                    }
-                                case 40:
-                                    {
-                                        state_stack.push(42);
-                                        props_stack.push(std::move(current));
-                                        break;
-                                    }
-                                case 47:
-                                    {
-                                        state_stack.push(48);
-                                        props_stack.push(std::move(current));
-                                        break;
-                                    }
-                                case 49:
-                                    {
-                                        state_stack.push(42);
+                                        state_stack.push(45);
                                         props_stack.push(std::move(current));
                                         break;
                                     }
                             }
+                            break;
                         }
+                    default: throw std::runtime_error("unexpected non-terminal index " + std::to_string(current.non_terminal_index));
                 }
                 generator.consume();
                 continue;
@@ -583,7 +618,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(9, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(11, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -603,7 +638,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(3,
-                                            reduction(1, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(0, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -617,7 +652,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(2,
-                                            reduction(5, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(4, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -631,7 +666,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(1,
-                                            reduction(7, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(6, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -645,7 +680,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(11, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(12, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -659,7 +694,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(3,
-                                            reduction(4, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(3, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -673,7 +708,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(3,
-                                            reduction(3, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(2, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -687,25 +722,11 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(3,
-                                            reduction(2, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
-                                                    std::move_iterator<iter_t>(tmp.end()))));
-                                    break;
-                                }
-                            case 21:
-                                {
-                                    std::list<Props> tmp;
-                                    for (auto i = 0; i < 1; ++i) {
-                                        auto &item = props_stack.top();
-                                        tmp.push_front(std::move(item));
-                                        state_stack.pop();
-                                        props_stack.pop();
-                                    }
-                                    generator.push(3,
                                             reduction(1, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 22:
+                            case 21:
                                 {
                                     std::list<Props> tmp;
                                     for (auto i = 0; i < 2; ++i) {
@@ -715,11 +736,11 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(2,
-                                            reduction(6, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(5, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 28:
+                            case 26:
                                 {
                                     std::list<Props> tmp;
                                     for (auto i = 0; i < 3; ++i) {
@@ -729,11 +750,11 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(12, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(13, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 36:
+                            case 35:
                                 {
                                     std::list<Props> tmp;
                                     for (auto i = 0; i < 1; ++i) {
@@ -742,12 +763,12 @@ namespace parser {
                                         state_stack.pop();
                                         props_stack.pop();
                                     }
-                                    generator.push(3,
-                                            reduction(1, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                    generator.push(2,
+                                            reduction(4, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 37:
+                            case 36:
                                 {
                                     std::list<Props> tmp;
                                     for (auto i = 0; i < 3; ++i) {
@@ -757,11 +778,11 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(1,
-                                            reduction(8, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(7, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 38:
+                            case 37:
                                 {
                                     std::list<Props> tmp;
                                     for (auto i = 0; i < 3; ++i) {
@@ -775,7 +796,23 @@ namespace parser {
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
+                            case 47:
+                                {
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 4; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(4,
+                                            reduction(9, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            default: throw std::runtime_error("unexpected state type " + std::to_string(state_stack.top()));
                         }
+                        break;
                     }
                 case lexer_token::LEFT_P:
                     {
@@ -804,7 +841,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(9, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(11, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -818,7 +855,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(3,
-                                            reduction(1, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(0, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -839,7 +876,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(11, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(12, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -860,7 +897,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(9, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(11, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -874,7 +911,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(3,
-                                            reduction(1, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(0, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -895,7 +932,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(11, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(12, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -916,7 +953,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(3,
-                                            reduction(4, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(3, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -930,7 +967,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(3,
-                                            reduction(3, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(2, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -944,25 +981,11 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(3,
-                                            reduction(2, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
-                                                    std::move_iterator<iter_t>(tmp.end()))));
-                                    break;
-                                }
-                            case 21:
-                                {
-                                    std::list<Props> tmp;
-                                    for (auto i = 0; i < 1; ++i) {
-                                        auto &item = props_stack.top();
-                                        tmp.push_front(std::move(item));
-                                        state_stack.pop();
-                                        props_stack.pop();
-                                    }
-                                    generator.push(3,
                                             reduction(1, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 28:
+                            case 26:
                                 {
                                     std::list<Props> tmp;
                                     for (auto i = 0; i < 3; ++i) {
@@ -972,32 +995,18 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(12, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(13, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 29:
+                            case 27:
                                 {
                                     state_stack.push(9);
                                     props_stack.push(std::move(current));
                                     generator.consume();
                                     break;
                                 }
-                            case 30:
-                                {
-                                    std::list<Props> tmp;
-                                    for (auto i = 0; i < 2; ++i) {
-                                        auto &item = props_stack.top();
-                                        tmp.push_front(std::move(item));
-                                        state_stack.pop();
-                                        props_stack.pop();
-                                    }
-                                    generator.push(3,
-                                            reduction(4, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
-                                                    std::move_iterator<iter_t>(tmp.end()))));
-                                    break;
-                                }
-                            case 31:
+                            case 28:
                                 {
                                     std::list<Props> tmp;
                                     for (auto i = 0; i < 2; ++i) {
@@ -1011,7 +1020,7 @@ namespace parser {
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 32:
+                            case 29:
                                 {
                                     std::list<Props> tmp;
                                     for (auto i = 0; i < 2; ++i) {
@@ -1025,10 +1034,10 @@ namespace parser {
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 33:
+                            case 30:
                                 {
                                     std::list<Props> tmp;
-                                    for (auto i = 0; i < 1; ++i) {
+                                    for (auto i = 0; i < 2; ++i) {
                                         auto &item = props_stack.top();
                                         tmp.push_front(std::move(item));
                                         state_stack.pop();
@@ -1039,21 +1048,21 @@ namespace parser {
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 36:
+                            case 31:
                                 {
-                                    std::list<Props> tmp;
-                                    for (auto i = 0; i < 1; ++i) {
-                                        auto &item = props_stack.top();
-                                        tmp.push_front(std::move(item));
-                                        state_stack.pop();
-                                        props_stack.pop();
-                                    }
-                                    generator.push(3,
-                                            reduction(1, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
-                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    state_stack.push(9);
+                                    props_stack.push(std::move(current));
+                                    generator.consume();
                                     break;
                                 }
-                            case 38:
+                            case 35:
+                                {
+                                    state_stack.push(1);
+                                    props_stack.push(std::move(current));
+                                    generator.consume();
+                                    break;
+                                }
+                            case 37:
                                 {
                                     std::list<Props> tmp;
                                     for (auto i = 0; i < 3; ++i) {
@@ -1067,7 +1076,7 @@ namespace parser {
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 43:
+                            case 41:
                                 {
                                     std::list<Props> tmp;
                                     for (auto i = 0; i < 3; ++i) {
@@ -1077,27 +1086,20 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(12, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(13, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            case 42:
+                                {
+                                    state_stack.push(9);
+                                    props_stack.push(std::move(current));
+                                    generator.consume();
                                     break;
                                 }
                             case 44:
                                 {
                                     std::list<Props> tmp;
-                                    for (auto i = 0; i < 1; ++i) {
-                                        auto &item = props_stack.top();
-                                        tmp.push_front(std::move(item));
-                                        state_stack.pop();
-                                        props_stack.pop();
-                                    }
-                                    generator.push(3,
-                                            reduction(1, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
-                                                    std::move_iterator<iter_t>(tmp.end()))));
-                                    break;
-                                }
-                            case 46:
-                                {
-                                    std::list<Props> tmp;
                                     for (auto i = 0; i < 3; ++i) {
                                         auto &item = props_stack.top();
                                         tmp.push_front(std::move(item));
@@ -1109,7 +1111,37 @@ namespace parser {
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
+                            case 47:
+                                {
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 4; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(4,
+                                            reduction(9, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            case 49:
+                                {
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 4; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(4,
+                                            reduction(9, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            default: throw std::runtime_error("unexpected state type " + std::to_string(state_stack.top()));
                         }
+                        break;
                     }
                 case lexer_token::RIGHT_P:
                     {
@@ -1124,13 +1156,13 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(9, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(11, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
                             case 11:
                                 {
-                                    state_stack.push(28);
+                                    state_stack.push(26);
                                     props_stack.push(std::move(current));
                                     generator.consume();
                                     break;
@@ -1145,7 +1177,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(3,
-                                            reduction(1, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(0, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -1159,7 +1191,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(2,
-                                            reduction(5, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(4, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -1173,7 +1205,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(1,
-                                            reduction(7, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(6, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -1187,32 +1219,18 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(11, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(12, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 27:
+                            case 25:
                                 {
-                                    state_stack.push(43);
+                                    state_stack.push(41);
                                     props_stack.push(std::move(current));
                                     generator.consume();
                                     break;
                                 }
-                            case 30:
-                                {
-                                    std::list<Props> tmp;
-                                    for (auto i = 0; i < 2; ++i) {
-                                        auto &item = props_stack.top();
-                                        tmp.push_front(std::move(item));
-                                        state_stack.pop();
-                                        props_stack.pop();
-                                    }
-                                    generator.push(3,
-                                            reduction(4, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
-                                                    std::move_iterator<iter_t>(tmp.end()))));
-                                    break;
-                                }
-                            case 31:
+                            case 28:
                                 {
                                     std::list<Props> tmp;
                                     for (auto i = 0; i < 2; ++i) {
@@ -1226,7 +1244,7 @@ namespace parser {
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 32:
+                            case 29:
                                 {
                                     std::list<Props> tmp;
                                     for (auto i = 0; i < 2; ++i) {
@@ -1240,10 +1258,10 @@ namespace parser {
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 33:
+                            case 30:
                                 {
                                     std::list<Props> tmp;
-                                    for (auto i = 0; i < 1; ++i) {
+                                    for (auto i = 0; i < 2; ++i) {
                                         auto &item = props_stack.top();
                                         tmp.push_front(std::move(item));
                                         state_stack.pop();
@@ -1254,7 +1272,21 @@ namespace parser {
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 34:
+                            case 31:
+                                {
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 1; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(2,
+                                            reduction(4, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            case 32:
                                 {
                                     std::list<Props> tmp;
                                     for (auto i = 0; i < 2; ++i) {
@@ -1264,7 +1296,35 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(2,
-                                            reduction(6, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(5, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            case 41:
+                                {
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 3; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(4,
+                                            reduction(13, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            case 42:
+                                {
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 1; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(2,
+                                            reduction(4, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -1277,40 +1337,12 @@ namespace parser {
                                         state_stack.pop();
                                         props_stack.pop();
                                     }
-                                    generator.push(4,
-                                            reduction(12, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                    generator.push(1,
+                                            reduction(7, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
                             case 44:
-                                {
-                                    std::list<Props> tmp;
-                                    for (auto i = 0; i < 1; ++i) {
-                                        auto &item = props_stack.top();
-                                        tmp.push_front(std::move(item));
-                                        state_stack.pop();
-                                        props_stack.pop();
-                                    }
-                                    generator.push(3,
-                                            reduction(1, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
-                                                    std::move_iterator<iter_t>(tmp.end()))));
-                                    break;
-                                }
-                            case 45:
-                                {
-                                    std::list<Props> tmp;
-                                    for (auto i = 0; i < 3; ++i) {
-                                        auto &item = props_stack.top();
-                                        tmp.push_front(std::move(item));
-                                        state_stack.pop();
-                                        props_stack.pop();
-                                    }
-                                    generator.push(1,
-                                            reduction(8, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
-                                                    std::move_iterator<iter_t>(tmp.end()))));
-                                    break;
-                                }
-                            case 46:
                                 {
                                     std::list<Props> tmp;
                                     for (auto i = 0; i < 3; ++i) {
@@ -1324,7 +1356,23 @@ namespace parser {
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
+                            case 49:
+                                {
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 4; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(4,
+                                            reduction(9, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            default: throw std::runtime_error("unexpected state type " + std::to_string(state_stack.top()));
                         }
+                        break;
                     }
                 case lexer_token::ZERO_MORE:
                     {
@@ -1339,11 +1387,25 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(9, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(11, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
                             case 4:
+                                {
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 1; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(3,
+                                            reduction(0, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            case 5:
                                 {
                                     state_stack.push(18);
                                     props_stack.push(std::move(current));
@@ -1360,7 +1422,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(11, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(12, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -1374,13 +1436,27 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(9, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(11, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
                             case 12:
                                 {
-                                    state_stack.push(30);
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 1; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(3,
+                                            reduction(0, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            case 13:
+                                {
+                                    state_stack.push(28);
                                     props_stack.push(std::move(current));
                                     generator.consume();
                                     break;
@@ -1395,46 +1471,123 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(11, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(12, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 21:
+                            case 18:
                                 {
-                                    state_stack.push(18);
-                                    props_stack.push(std::move(current));
-                                    generator.consume();
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 2; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(3,
+                                            reduction(3, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            case 19:
+                                {
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 2; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(3,
+                                            reduction(2, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            case 20:
+                                {
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 2; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(3,
+                                            reduction(1, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            case 26:
+                                {
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 3; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(4,
+                                            reduction(13, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
                             case 28:
                                 {
                                     std::list<Props> tmp;
-                                    for (auto i = 0; i < 3; ++i) {
+                                    for (auto i = 0; i < 2; ++i) {
                                         auto &item = props_stack.top();
                                         tmp.push_front(std::move(item));
                                         state_stack.pop();
                                         props_stack.pop();
                                     }
-                                    generator.push(4,
-                                            reduction(12, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                    generator.push(3,
+                                            reduction(3, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 33:
+                            case 29:
                                 {
-                                    state_stack.push(30);
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 2; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(3,
+                                            reduction(2, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            case 30:
+                                {
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 2; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(3,
+                                            reduction(1, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            case 31:
+                                {
+                                    state_stack.push(28);
                                     props_stack.push(std::move(current));
                                     generator.consume();
                                     break;
                                 }
-                            case 36:
+                            case 35:
                                 {
                                     state_stack.push(18);
                                     props_stack.push(std::move(current));
                                     generator.consume();
                                     break;
                                 }
-                            case 38:
+                            case 37:
                                 {
                                     std::list<Props> tmp;
                                     for (auto i = 0; i < 3; ++i) {
@@ -1448,7 +1601,7 @@ namespace parser {
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 43:
+                            case 41:
                                 {
                                     std::list<Props> tmp;
                                     for (auto i = 0; i < 3; ++i) {
@@ -1458,18 +1611,18 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(12, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(13, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 44:
+                            case 42:
                                 {
-                                    state_stack.push(30);
+                                    state_stack.push(28);
                                     props_stack.push(std::move(current));
                                     generator.consume();
                                     break;
                                 }
-                            case 46:
+                            case 44:
                                 {
                                     std::list<Props> tmp;
                                     for (auto i = 0; i < 3; ++i) {
@@ -1483,7 +1636,37 @@ namespace parser {
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
+                            case 47:
+                                {
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 4; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(4,
+                                            reduction(9, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            case 49:
+                                {
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 4; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(4,
+                                            reduction(9, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            default: throw std::runtime_error("unexpected state type " + std::to_string(state_stack.top()));
                         }
+                        break;
                     }
                 case lexer_token::ONE_MORE:
                     {
@@ -1498,11 +1681,25 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(9, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(11, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
                             case 4:
+                                {
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 1; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(3,
+                                            reduction(0, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            case 5:
                                 {
                                     state_stack.push(19);
                                     props_stack.push(std::move(current));
@@ -1519,7 +1716,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(11, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(12, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -1533,13 +1730,27 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(9, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(11, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
                             case 12:
                                 {
-                                    state_stack.push(31);
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 1; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(3,
+                                            reduction(0, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            case 13:
+                                {
+                                    state_stack.push(29);
                                     props_stack.push(std::move(current));
                                     generator.consume();
                                     break;
@@ -1554,18 +1765,53 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(11, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(12, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 21:
+                            case 18:
                                 {
-                                    state_stack.push(19);
-                                    props_stack.push(std::move(current));
-                                    generator.consume();
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 2; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(3,
+                                            reduction(3, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 28:
+                            case 19:
+                                {
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 2; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(3,
+                                            reduction(2, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            case 20:
+                                {
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 2; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(3,
+                                            reduction(1, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            case 26:
                                 {
                                     std::list<Props> tmp;
                                     for (auto i = 0; i < 3; ++i) {
@@ -1575,100 +1821,167 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(12, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(13, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 33:
+                            case 28:
                                 {
-                                    state_stack.push(31);
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 2; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(3,
+                                            reduction(3, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            case 29:
+                                {
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 2; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(3,
+                                            reduction(2, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            case 30:
+                                {
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 2; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(3,
+                                            reduction(1, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            case 31:
+                                {
+                                    state_stack.push(29);
                                     props_stack.push(std::move(current));
                                     generator.consume();
                                     break;
                                 }
-                            case 36:
+                            case 35:
                                 {
                                     state_stack.push(19);
+                                    props_stack.push(std::move(current));
+                                    generator.consume();
+                                    break;
+                                }
+                            case 37:
+                                {
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 3; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(4,
+                                            reduction(10, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            case 41:
+                                {
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 3; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(4,
+                                            reduction(13, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            case 42:
+                                {
+                                    state_stack.push(29);
+                                    props_stack.push(std::move(current));
+                                    generator.consume();
+                                    break;
+                                }
+                            case 44:
+                                {
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 3; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(4,
+                                            reduction(10, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            case 47:
+                                {
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 4; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(4,
+                                            reduction(9, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            case 49:
+                                {
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 4; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(4,
+                                            reduction(9, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            default: throw std::runtime_error("unexpected state type " + std::to_string(state_stack.top()));
+                        }
+                        break;
+                    }
+                case lexer_token::REGION:
+                    {
+                        switch (state_stack.top()) {
+                            case 24:
+                                {
+                                    state_stack.push(40);
                                     props_stack.push(std::move(current));
                                     generator.consume();
                                     break;
                                 }
                             case 38:
                                 {
-                                    std::list<Props> tmp;
-                                    for (auto i = 0; i < 3; ++i) {
-                                        auto &item = props_stack.top();
-                                        tmp.push_front(std::move(item));
-                                        state_stack.pop();
-                                        props_stack.pop();
-                                    }
-                                    generator.push(4,
-                                            reduction(10, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
-                                                    std::move_iterator<iter_t>(tmp.end()))));
-                                    break;
-                                }
-                            case 43:
-                                {
-                                    std::list<Props> tmp;
-                                    for (auto i = 0; i < 3; ++i) {
-                                        auto &item = props_stack.top();
-                                        tmp.push_front(std::move(item));
-                                        state_stack.pop();
-                                        props_stack.pop();
-                                    }
-                                    generator.push(4,
-                                            reduction(12, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
-                                                    std::move_iterator<iter_t>(tmp.end()))));
-                                    break;
-                                }
-                            case 44:
-                                {
-                                    state_stack.push(31);
+                                    state_stack.push(46);
                                     props_stack.push(std::move(current));
                                     generator.consume();
                                     break;
                                 }
-                            case 46:
-                                {
-                                    std::list<Props> tmp;
-                                    for (auto i = 0; i < 3; ++i) {
-                                        auto &item = props_stack.top();
-                                        tmp.push_front(std::move(item));
-                                        state_stack.pop();
-                                        props_stack.pop();
-                                    }
-                                    generator.push(4,
-                                            reduction(10, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
-                                                    std::move_iterator<iter_t>(tmp.end()))));
-                                    break;
-                                }
+                            default: throw std::runtime_error("unexpected state type " + std::to_string(state_stack.top()));
                         }
-                    }
-                case lexer_token::REGION:
-                    {
-                        switch (state_stack.top()) {
-                            case 26:
-                                {
-                                    state_stack.push(41);
-                                    props_stack.push(std::move(current));
-                                    generator.consume();
-                                    break;
-                                }
-                            case 40:
-                                {
-                                    state_stack.push(41);
-                                    props_stack.push(std::move(current));
-                                    generator.consume();
-                                    break;
-                                }
-                            case 49:
-                                {
-                                    state_stack.push(41);
-                                    props_stack.push(std::move(current));
-                                    generator.consume();
-                                    break;
-                                }
-                        }
+                        break;
                     }
                 case lexer_token::ANY:
                     {
@@ -1697,7 +2010,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(9, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(11, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -1711,7 +2024,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(3,
-                                            reduction(1, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(0, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -1732,7 +2045,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(11, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(12, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -1753,7 +2066,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(9, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(11, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -1767,7 +2080,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(3,
-                                            reduction(1, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(0, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -1788,7 +2101,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(11, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(12, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -1809,7 +2122,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(3,
-                                            reduction(4, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(3, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -1823,7 +2136,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(3,
-                                            reduction(3, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(2, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -1837,25 +2150,11 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(3,
-                                            reduction(2, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
-                                                    std::move_iterator<iter_t>(tmp.end()))));
-                                    break;
-                                }
-                            case 21:
-                                {
-                                    std::list<Props> tmp;
-                                    for (auto i = 0; i < 1; ++i) {
-                                        auto &item = props_stack.top();
-                                        tmp.push_front(std::move(item));
-                                        state_stack.pop();
-                                        props_stack.pop();
-                                    }
-                                    generator.push(3,
                                             reduction(1, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 28:
+                            case 26:
                                 {
                                     std::list<Props> tmp;
                                     for (auto i = 0; i < 3; ++i) {
@@ -1865,32 +2164,18 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(12, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(13, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 29:
+                            case 27:
                                 {
                                     state_stack.push(10);
                                     props_stack.push(std::move(current));
                                     generator.consume();
                                     break;
                                 }
-                            case 30:
-                                {
-                                    std::list<Props> tmp;
-                                    for (auto i = 0; i < 2; ++i) {
-                                        auto &item = props_stack.top();
-                                        tmp.push_front(std::move(item));
-                                        state_stack.pop();
-                                        props_stack.pop();
-                                    }
-                                    generator.push(3,
-                                            reduction(4, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
-                                                    std::move_iterator<iter_t>(tmp.end()))));
-                                    break;
-                                }
-                            case 31:
+                            case 28:
                                 {
                                     std::list<Props> tmp;
                                     for (auto i = 0; i < 2; ++i) {
@@ -1904,7 +2189,7 @@ namespace parser {
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 32:
+                            case 29:
                                 {
                                     std::list<Props> tmp;
                                     for (auto i = 0; i < 2; ++i) {
@@ -1918,10 +2203,10 @@ namespace parser {
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 33:
+                            case 30:
                                 {
                                     std::list<Props> tmp;
-                                    for (auto i = 0; i < 1; ++i) {
+                                    for (auto i = 0; i < 2; ++i) {
                                         auto &item = props_stack.top();
                                         tmp.push_front(std::move(item));
                                         state_stack.pop();
@@ -1932,21 +2217,21 @@ namespace parser {
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 36:
+                            case 31:
                                 {
-                                    std::list<Props> tmp;
-                                    for (auto i = 0; i < 1; ++i) {
-                                        auto &item = props_stack.top();
-                                        tmp.push_front(std::move(item));
-                                        state_stack.pop();
-                                        props_stack.pop();
-                                    }
-                                    generator.push(3,
-                                            reduction(1, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
-                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    state_stack.push(10);
+                                    props_stack.push(std::move(current));
+                                    generator.consume();
                                     break;
                                 }
-                            case 38:
+                            case 35:
+                                {
+                                    state_stack.push(2);
+                                    props_stack.push(std::move(current));
+                                    generator.consume();
+                                    break;
+                                }
+                            case 37:
                                 {
                                     std::list<Props> tmp;
                                     for (auto i = 0; i < 3; ++i) {
@@ -1960,7 +2245,7 @@ namespace parser {
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 43:
+                            case 41:
                                 {
                                     std::list<Props> tmp;
                                     for (auto i = 0; i < 3; ++i) {
@@ -1970,27 +2255,20 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(12, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(13, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            case 42:
+                                {
+                                    state_stack.push(10);
+                                    props_stack.push(std::move(current));
+                                    generator.consume();
                                     break;
                                 }
                             case 44:
                                 {
                                     std::list<Props> tmp;
-                                    for (auto i = 0; i < 1; ++i) {
-                                        auto &item = props_stack.top();
-                                        tmp.push_front(std::move(item));
-                                        state_stack.pop();
-                                        props_stack.pop();
-                                    }
-                                    generator.push(3,
-                                            reduction(1, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
-                                                    std::move_iterator<iter_t>(tmp.end()))));
-                                    break;
-                                }
-                            case 46:
-                                {
-                                    std::list<Props> tmp;
                                     for (auto i = 0; i < 3; ++i) {
                                         auto &item = props_stack.top();
                                         tmp.push_front(std::move(item));
@@ -2002,7 +2280,37 @@ namespace parser {
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
+                            case 47:
+                                {
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 4; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(4,
+                                            reduction(9, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            case 49:
+                                {
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 4; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(4,
+                                            reduction(9, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            default: throw std::runtime_error("unexpected state type " + std::to_string(state_stack.top()));
                         }
+                        break;
                     }
                 case lexer_token::ZERO_ONE:
                     {
@@ -2017,11 +2325,25 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(9, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(11, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
                             case 4:
+                                {
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 1; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(3,
+                                            reduction(0, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            case 5:
                                 {
                                     state_stack.push(20);
                                     props_stack.push(std::move(current));
@@ -2038,7 +2360,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(11, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(12, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -2052,13 +2374,27 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(9, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(11, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
                             case 12:
                                 {
-                                    state_stack.push(32);
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 1; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(3,
+                                            reduction(0, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            case 13:
+                                {
+                                    state_stack.push(30);
                                     props_stack.push(std::move(current));
                                     generator.consume();
                                     break;
@@ -2073,46 +2409,123 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(11, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(12, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 21:
+                            case 18:
                                 {
-                                    state_stack.push(20);
-                                    props_stack.push(std::move(current));
-                                    generator.consume();
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 2; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(3,
+                                            reduction(3, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            case 19:
+                                {
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 2; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(3,
+                                            reduction(2, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            case 20:
+                                {
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 2; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(3,
+                                            reduction(1, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            case 26:
+                                {
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 3; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(4,
+                                            reduction(13, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
                             case 28:
                                 {
                                     std::list<Props> tmp;
-                                    for (auto i = 0; i < 3; ++i) {
+                                    for (auto i = 0; i < 2; ++i) {
                                         auto &item = props_stack.top();
                                         tmp.push_front(std::move(item));
                                         state_stack.pop();
                                         props_stack.pop();
                                     }
-                                    generator.push(4,
-                                            reduction(12, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                    generator.push(3,
+                                            reduction(3, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 33:
+                            case 29:
                                 {
-                                    state_stack.push(32);
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 2; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(3,
+                                            reduction(2, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            case 30:
+                                {
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 2; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(3,
+                                            reduction(1, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            case 31:
+                                {
+                                    state_stack.push(30);
                                     props_stack.push(std::move(current));
                                     generator.consume();
                                     break;
                                 }
-                            case 36:
+                            case 35:
                                 {
                                     state_stack.push(20);
                                     props_stack.push(std::move(current));
                                     generator.consume();
                                     break;
                                 }
-                            case 38:
+                            case 37:
                                 {
                                     std::list<Props> tmp;
                                     for (auto i = 0; i < 3; ++i) {
@@ -2126,7 +2539,7 @@ namespace parser {
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 43:
+                            case 41:
                                 {
                                     std::list<Props> tmp;
                                     for (auto i = 0; i < 3; ++i) {
@@ -2136,18 +2549,18 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(12, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(13, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 44:
+                            case 42:
                                 {
-                                    state_stack.push(32);
+                                    state_stack.push(30);
                                     props_stack.push(std::move(current));
                                     generator.consume();
                                     break;
                                 }
-                            case 46:
+                            case 44:
                                 {
                                     std::list<Props> tmp;
                                     for (auto i = 0; i < 3; ++i) {
@@ -2161,7 +2574,37 @@ namespace parser {
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
+                            case 47:
+                                {
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 4; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(4,
+                                            reduction(9, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            case 49:
+                                {
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 4; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(4,
+                                            reduction(9, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            default: throw std::runtime_error("unexpected state type " + std::to_string(state_stack.top()));
                         }
+                        break;
                     }
                 case lexer_token::LEFT_B:
                     {
@@ -2190,7 +2633,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(9, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(11, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -2204,7 +2647,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(3,
-                                            reduction(1, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(0, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -2225,7 +2668,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(11, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(12, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -2246,7 +2689,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(9, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(11, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -2260,7 +2703,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(3,
-                                            reduction(1, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(0, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -2281,7 +2724,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(11, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(12, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -2302,7 +2745,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(3,
-                                            reduction(4, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(3, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -2316,7 +2759,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(3,
-                                            reduction(3, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(2, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -2330,25 +2773,11 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(3,
-                                            reduction(2, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
-                                                    std::move_iterator<iter_t>(tmp.end()))));
-                                    break;
-                                }
-                            case 21:
-                                {
-                                    std::list<Props> tmp;
-                                    for (auto i = 0; i < 1; ++i) {
-                                        auto &item = props_stack.top();
-                                        tmp.push_front(std::move(item));
-                                        state_stack.pop();
-                                        props_stack.pop();
-                                    }
-                                    generator.push(3,
                                             reduction(1, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 28:
+                            case 26:
                                 {
                                     std::list<Props> tmp;
                                     for (auto i = 0; i < 3; ++i) {
@@ -2358,32 +2787,18 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(12, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(13, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 29:
+                            case 27:
                                 {
                                     state_stack.push(15);
                                     props_stack.push(std::move(current));
                                     generator.consume();
                                     break;
                                 }
-                            case 30:
-                                {
-                                    std::list<Props> tmp;
-                                    for (auto i = 0; i < 2; ++i) {
-                                        auto &item = props_stack.top();
-                                        tmp.push_front(std::move(item));
-                                        state_stack.pop();
-                                        props_stack.pop();
-                                    }
-                                    generator.push(3,
-                                            reduction(4, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
-                                                    std::move_iterator<iter_t>(tmp.end()))));
-                                    break;
-                                }
-                            case 31:
+                            case 28:
                                 {
                                     std::list<Props> tmp;
                                     for (auto i = 0; i < 2; ++i) {
@@ -2397,7 +2812,7 @@ namespace parser {
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 32:
+                            case 29:
                                 {
                                     std::list<Props> tmp;
                                     for (auto i = 0; i < 2; ++i) {
@@ -2411,10 +2826,10 @@ namespace parser {
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 33:
+                            case 30:
                                 {
                                     std::list<Props> tmp;
-                                    for (auto i = 0; i < 1; ++i) {
+                                    for (auto i = 0; i < 2; ++i) {
                                         auto &item = props_stack.top();
                                         tmp.push_front(std::move(item));
                                         state_stack.pop();
@@ -2425,21 +2840,21 @@ namespace parser {
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 36:
+                            case 31:
                                 {
-                                    std::list<Props> tmp;
-                                    for (auto i = 0; i < 1; ++i) {
-                                        auto &item = props_stack.top();
-                                        tmp.push_front(std::move(item));
-                                        state_stack.pop();
-                                        props_stack.pop();
-                                    }
-                                    generator.push(3,
-                                            reduction(1, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
-                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    state_stack.push(15);
+                                    props_stack.push(std::move(current));
+                                    generator.consume();
                                     break;
                                 }
-                            case 38:
+                            case 35:
+                                {
+                                    state_stack.push(7);
+                                    props_stack.push(std::move(current));
+                                    generator.consume();
+                                    break;
+                                }
+                            case 37:
                                 {
                                     std::list<Props> tmp;
                                     for (auto i = 0; i < 3; ++i) {
@@ -2453,7 +2868,7 @@ namespace parser {
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 43:
+                            case 41:
                                 {
                                     std::list<Props> tmp;
                                     for (auto i = 0; i < 3; ++i) {
@@ -2463,27 +2878,20 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(12, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(13, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            case 42:
+                                {
+                                    state_stack.push(15);
+                                    props_stack.push(std::move(current));
+                                    generator.consume();
                                     break;
                                 }
                             case 44:
                                 {
                                     std::list<Props> tmp;
-                                    for (auto i = 0; i < 1; ++i) {
-                                        auto &item = props_stack.top();
-                                        tmp.push_front(std::move(item));
-                                        state_stack.pop();
-                                        props_stack.pop();
-                                    }
-                                    generator.push(3,
-                                            reduction(1, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
-                                                    std::move_iterator<iter_t>(tmp.end()))));
-                                    break;
-                                }
-                            case 46:
-                                {
-                                    std::list<Props> tmp;
                                     for (auto i = 0; i < 3; ++i) {
                                         auto &item = props_stack.top();
                                         tmp.push_front(std::move(item));
@@ -2495,14 +2903,44 @@ namespace parser {
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
+                            case 47:
+                                {
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 4; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(4,
+                                            reduction(9, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            case 49:
+                                {
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 4; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(4,
+                                            reduction(9, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            default: throw std::runtime_error("unexpected state type " + std::to_string(state_stack.top()));
                         }
+                        break;
                     }
                 case lexer_token::RIGHT_B:
                     {
                         switch (state_stack.top()) {
-                            case 23:
+                            case 22:
                                 {
-                                    state_stack.push(38);
+                                    state_stack.push(37);
                                     props_stack.push(std::move(current));
                                     generator.consume();
                                     break;
@@ -2517,35 +2955,49 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(5,
-                                            reduction(13, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(15, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 26:
+                            case 33:
+                                {
+                                    state_stack.push(44);
+                                    props_stack.push(std::move(current));
+                                    generator.consume();
+                                    break;
+                                }
+                            case 38:
                                 {
                                     std::list<Props> tmp;
-                                    for (auto i = 0; i < 1; ++i) {
+                                    for (auto i = 0; i < 2; ++i) {
                                         auto &item = props_stack.top();
                                         tmp.push_front(std::move(item));
                                         state_stack.pop();
                                         props_stack.pop();
                                     }
-                                    generator.push(6,
-                                            reduction(15, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                    generator.push(5,
+                                            reduction(17, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
-                                    break;
-                                }
-                            case 35:
-                                {
-                                    state_stack.push(46);
-                                    props_stack.push(std::move(current));
-                                    generator.consume();
                                     break;
                                 }
                             case 39:
                                 {
+                                    state_stack.push(47);
+                                    props_stack.push(std::move(current));
+                                    generator.consume();
+                                    break;
+                                }
+                            case 45:
+                                {
+                                    state_stack.push(49);
+                                    props_stack.push(std::move(current));
+                                    generator.consume();
+                                    break;
+                                }
+                            case 48:
+                                {
                                     std::list<Props> tmp;
-                                    for (auto i = 0; i < 2; ++i) {
+                                    for (auto i = 0; i < 3; ++i) {
                                         auto &item = props_stack.top();
                                         tmp.push_front(std::move(item));
                                         state_stack.pop();
@@ -2556,35 +3008,7 @@ namespace parser {
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 40:
-                                {
-                                    std::list<Props> tmp;
-                                    for (auto i = 0; i < 1; ++i) {
-                                        auto &item = props_stack.top();
-                                        tmp.push_front(std::move(item));
-                                        state_stack.pop();
-                                        props_stack.pop();
-                                    }
-                                    generator.push(6,
-                                            reduction(15, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
-                                                    std::move_iterator<iter_t>(tmp.end()))));
-                                    break;
-                                }
-                            case 42:
-                                {
-                                    std::list<Props> tmp;
-                                    for (auto i = 0; i < 2; ++i) {
-                                        auto &item = props_stack.top();
-                                        tmp.push_front(std::move(item));
-                                        state_stack.pop();
-                                        props_stack.pop();
-                                    }
-                                    generator.push(6,
-                                            reduction(17, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
-                                                    std::move_iterator<iter_t>(tmp.end()))));
-                                    break;
-                                }
-                            case 48:
+                            case 50:
                                 {
                                     std::list<Props> tmp;
                                     for (auto i = 0; i < 4; ++i) {
@@ -2593,45 +3017,35 @@ namespace parser {
                                         state_stack.pop();
                                         props_stack.pop();
                                     }
-                                    generator.push(6,
+                                    generator.push(5,
                                             reduction(16, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 49:
-                                {
-                                    std::list<Props> tmp;
-                                    for (auto i = 0; i < 1; ++i) {
-                                        auto &item = props_stack.top();
-                                        tmp.push_front(std::move(item));
-                                        state_stack.pop();
-                                        props_stack.pop();
-                                    }
-                                    generator.push(6,
-                                            reduction(15, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
-                                                    std::move_iterator<iter_t>(tmp.end()))));
-                                    break;
-                                }
+                            default: throw std::runtime_error("unexpected state type " + std::to_string(state_stack.top()));
                         }
+                        break;
                     }
                 case lexer_token::NOT:
                     {
                         switch (state_stack.top()) {
                             case 7:
                                 {
-                                    state_stack.push(25);
+                                    state_stack.push(23);
                                     props_stack.push(std::move(current));
                                     generator.consume();
                                     break;
                                 }
                             case 15:
                                 {
-                                    state_stack.push(25);
+                                    state_stack.push(34);
                                     props_stack.push(std::move(current));
                                     generator.consume();
                                     break;
                                 }
+                            default: throw std::runtime_error("unexpected state type " + std::to_string(state_stack.top()));
                         }
+                        break;
                     }
                 case lexer_token::CHAR:
                     {
@@ -2660,7 +3074,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(9, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(11, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -2674,7 +3088,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(3,
-                                            reduction(1, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(0, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -2687,7 +3101,7 @@ namespace parser {
                                 }
                             case 7:
                                 {
-                                    state_stack.push(26);
+                                    state_stack.push(24);
                                     props_stack.push(std::move(current));
                                     generator.consume();
                                     break;
@@ -2702,7 +3116,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(11, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(12, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -2723,7 +3137,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(9, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(11, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -2737,7 +3151,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(3,
-                                            reduction(1, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(0, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -2750,7 +3164,7 @@ namespace parser {
                                 }
                             case 15:
                                 {
-                                    state_stack.push(26);
+                                    state_stack.push(24);
                                     props_stack.push(std::move(current));
                                     generator.consume();
                                     break;
@@ -2765,7 +3179,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(11, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(12, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -2786,7 +3200,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(3,
-                                            reduction(4, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(3, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -2800,7 +3214,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(3,
-                                            reduction(3, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(2, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -2814,11 +3228,25 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(3,
-                                            reduction(2, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(1, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 21:
+                            case 22:
+                                {
+                                    state_stack.push(38);
+                                    props_stack.push(std::move(current));
+                                    generator.consume();
+                                    break;
+                                }
+                            case 23:
+                                {
+                                    state_stack.push(24);
+                                    props_stack.push(std::move(current));
+                                    generator.consume();
+                                    break;
+                                }
+                            case 24:
                                 {
                                     std::list<Props> tmp;
                                     for (auto i = 0; i < 1; ++i) {
@@ -2827,26 +3255,12 @@ namespace parser {
                                         state_stack.pop();
                                         props_stack.pop();
                                     }
-                                    generator.push(3,
-                                            reduction(1, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                    generator.push(5,
+                                            reduction(15, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 25:
-                                {
-                                    state_stack.push(40);
-                                    props_stack.push(std::move(current));
-                                    generator.consume();
-                                    break;
-                                }
                             case 26:
-                                {
-                                    state_stack.push(40);
-                                    props_stack.push(std::move(current));
-                                    generator.consume();
-                                    break;
-                                }
-                            case 28:
                                 {
                                     std::list<Props> tmp;
                                     for (auto i = 0; i < 3; ++i) {
@@ -2856,32 +3270,18 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(12, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(13, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 29:
+                            case 27:
                                 {
                                     state_stack.push(16);
                                     props_stack.push(std::move(current));
                                     generator.consume();
                                     break;
                                 }
-                            case 30:
-                                {
-                                    std::list<Props> tmp;
-                                    for (auto i = 0; i < 2; ++i) {
-                                        auto &item = props_stack.top();
-                                        tmp.push_front(std::move(item));
-                                        state_stack.pop();
-                                        props_stack.pop();
-                                    }
-                                    generator.push(3,
-                                            reduction(4, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
-                                                    std::move_iterator<iter_t>(tmp.end()))));
-                                    break;
-                                }
-                            case 31:
+                            case 28:
                                 {
                                     std::list<Props> tmp;
                                     for (auto i = 0; i < 2; ++i) {
@@ -2895,7 +3295,7 @@ namespace parser {
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 32:
+                            case 29:
                                 {
                                     std::list<Props> tmp;
                                     for (auto i = 0; i < 2; ++i) {
@@ -2909,10 +3309,10 @@ namespace parser {
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 33:
+                            case 30:
                                 {
                                     std::list<Props> tmp;
-                                    for (auto i = 0; i < 1; ++i) {
+                                    for (auto i = 0; i < 2; ++i) {
                                         auto &item = props_stack.top();
                                         tmp.push_front(std::move(item));
                                         state_stack.pop();
@@ -2923,50 +3323,78 @@ namespace parser {
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 36:
+                            case 31:
+                                {
+                                    state_stack.push(16);
+                                    props_stack.push(std::move(current));
+                                    generator.consume();
+                                    break;
+                                }
+                            case 33:
+                                {
+                                    state_stack.push(38);
+                                    props_stack.push(std::move(current));
+                                    generator.consume();
+                                    break;
+                                }
+                            case 34:
+                                {
+                                    state_stack.push(24);
+                                    props_stack.push(std::move(current));
+                                    generator.consume();
+                                    break;
+                                }
+                            case 35:
+                                {
+                                    state_stack.push(8);
+                                    props_stack.push(std::move(current));
+                                    generator.consume();
+                                    break;
+                                }
+                            case 37:
                                 {
                                     std::list<Props> tmp;
-                                    for (auto i = 0; i < 1; ++i) {
+                                    for (auto i = 0; i < 3; ++i) {
                                         auto &item = props_stack.top();
                                         tmp.push_front(std::move(item));
                                         state_stack.pop();
                                         props_stack.pop();
                                     }
-                                    generator.push(3,
-                                            reduction(1, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                    generator.push(4,
+                                            reduction(10, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
                             case 38:
                                 {
                                     std::list<Props> tmp;
-                                    for (auto i = 0; i < 3; ++i) {
+                                    for (auto i = 0; i < 2; ++i) {
                                         auto &item = props_stack.top();
                                         tmp.push_front(std::move(item));
                                         state_stack.pop();
                                         props_stack.pop();
                                     }
-                                    generator.push(4,
-                                            reduction(10, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                    generator.push(5,
+                                            reduction(17, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            case 39:
+                                {
+                                    state_stack.push(38);
+                                    props_stack.push(std::move(current));
+                                    generator.consume();
                                     break;
                                 }
                             case 40:
                                 {
-                                    state_stack.push(40);
+                                    state_stack.push(48);
                                     props_stack.push(std::move(current));
                                     generator.consume();
                                     break;
                                 }
                             case 41:
                                 {
-                                    state_stack.push(47);
-                                    props_stack.push(std::move(current));
-                                    generator.consume();
-                                    break;
-                                }
-                            case 43:
-                                {
                                     std::list<Props> tmp;
                                     for (auto i = 0; i < 3; ++i) {
                                         auto &item = props_stack.top();
@@ -2975,25 +3403,18 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(12, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(13, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            case 42:
+                                {
+                                    state_stack.push(16);
+                                    props_stack.push(std::move(current));
+                                    generator.consume();
                                     break;
                                 }
                             case 44:
-                                {
-                                    std::list<Props> tmp;
-                                    for (auto i = 0; i < 1; ++i) {
-                                        auto &item = props_stack.top();
-                                        tmp.push_front(std::move(item));
-                                        state_stack.pop();
-                                        props_stack.pop();
-                                    }
-                                    generator.push(3,
-                                            reduction(1, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
-                                                    std::move_iterator<iter_t>(tmp.end()))));
-                                    break;
-                                }
-                            case 46:
                                 {
                                     std::list<Props> tmp;
                                     for (auto i = 0; i < 3; ++i) {
@@ -3007,21 +3428,79 @@ namespace parser {
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 47:
+                            case 45:
                                 {
-                                    state_stack.push(49);
+                                    state_stack.push(38);
                                     props_stack.push(std::move(current));
                                     generator.consume();
+                                    break;
+                                }
+                            case 46:
+                                {
+                                    state_stack.push(50);
+                                    props_stack.push(std::move(current));
+                                    generator.consume();
+                                    break;
+                                }
+                            case 47:
+                                {
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 4; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(4,
+                                            reduction(9, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            case 48:
+                                {
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 3; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(5,
+                                            reduction(14, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
                             case 49:
                                 {
-                                    state_stack.push(40);
-                                    props_stack.push(std::move(current));
-                                    generator.consume();
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 4; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(4,
+                                            reduction(9, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
+                            case 50:
+                                {
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 4; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(5,
+                                            reduction(16, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            default: throw std::runtime_error("unexpected state type " + std::to_string(state_stack.top()));
                         }
+                        break;
                     }
                 case lexer_token::SPLIT:
                     {
@@ -3036,7 +3515,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(9, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(11, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -3057,7 +3536,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(3,
-                                            reduction(1, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(0, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -3071,7 +3550,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(2,
-                                            reduction(5, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(4, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -3085,7 +3564,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(1,
-                                            reduction(7, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(6, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -3099,7 +3578,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(11, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(12, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -3113,13 +3592,13 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(9, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(11, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
                             case 11:
                                 {
-                                    state_stack.push(29);
+                                    state_stack.push(27);
                                     props_stack.push(std::move(current));
                                     generator.consume();
                                     break;
@@ -3134,7 +3613,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(3,
-                                            reduction(1, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(0, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -3148,7 +3627,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(2,
-                                            reduction(5, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(4, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -3162,7 +3641,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(1,
-                                            reduction(7, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(6, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -3176,7 +3655,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(11, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(12, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -3190,7 +3669,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(3,
-                                            reduction(4, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(3, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -3204,7 +3683,7 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(3,
-                                            reduction(3, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(2, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -3218,25 +3697,11 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(3,
-                                            reduction(2, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
-                                                    std::move_iterator<iter_t>(tmp.end()))));
-                                    break;
-                                }
-                            case 21:
-                                {
-                                    std::list<Props> tmp;
-                                    for (auto i = 0; i < 1; ++i) {
-                                        auto &item = props_stack.top();
-                                        tmp.push_front(std::move(item));
-                                        state_stack.pop();
-                                        props_stack.pop();
-                                    }
-                                    generator.push(3,
                                             reduction(1, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 22:
+                            case 21:
                                 {
                                     std::list<Props> tmp;
                                     for (auto i = 0; i < 2; ++i) {
@@ -3246,18 +3711,18 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(2,
-                                            reduction(6, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(5, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 27:
+                            case 25:
                                 {
-                                    state_stack.push(29);
+                                    state_stack.push(27);
                                     props_stack.push(std::move(current));
                                     generator.consume();
                                     break;
                                 }
-                            case 28:
+                            case 26:
                                 {
                                     std::list<Props> tmp;
                                     for (auto i = 0; i < 3; ++i) {
@@ -3267,25 +3732,11 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(12, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(13, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 30:
-                                {
-                                    std::list<Props> tmp;
-                                    for (auto i = 0; i < 2; ++i) {
-                                        auto &item = props_stack.top();
-                                        tmp.push_front(std::move(item));
-                                        state_stack.pop();
-                                        props_stack.pop();
-                                    }
-                                    generator.push(3,
-                                            reduction(4, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
-                                                    std::move_iterator<iter_t>(tmp.end()))));
-                                    break;
-                                }
-                            case 31:
+                            case 28:
                                 {
                                     std::list<Props> tmp;
                                     for (auto i = 0; i < 2; ++i) {
@@ -3299,7 +3750,7 @@ namespace parser {
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 32:
+                            case 29:
                                 {
                                     std::list<Props> tmp;
                                     for (auto i = 0; i < 2; ++i) {
@@ -3313,10 +3764,10 @@ namespace parser {
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 33:
+                            case 30:
                                 {
                                     std::list<Props> tmp;
-                                    for (auto i = 0; i < 1; ++i) {
+                                    for (auto i = 0; i < 2; ++i) {
                                         auto &item = props_stack.top();
                                         tmp.push_front(std::move(item));
                                         state_stack.pop();
@@ -3327,7 +3778,21 @@ namespace parser {
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 34:
+                            case 31:
+                                {
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 1; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(2,
+                                            reduction(4, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            case 32:
                                 {
                                     std::list<Props> tmp;
                                     for (auto i = 0; i < 2; ++i) {
@@ -3337,11 +3802,11 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(2,
-                                            reduction(6, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(5, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 36:
+                            case 35:
                                 {
                                     std::list<Props> tmp;
                                     for (auto i = 0; i < 1; ++i) {
@@ -3350,8 +3815,22 @@ namespace parser {
                                         state_stack.pop();
                                         props_stack.pop();
                                     }
-                                    generator.push(3,
-                                            reduction(1, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                    generator.push(2,
+                                            reduction(4, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            case 36:
+                                {
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 3; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(1,
+                                            reduction(7, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -3364,12 +3843,12 @@ namespace parser {
                                         state_stack.pop();
                                         props_stack.pop();
                                     }
-                                    generator.push(1,
-                                            reduction(8, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                    generator.push(4,
+                                            reduction(10, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
-                            case 38:
+                            case 41:
                                 {
                                     std::list<Props> tmp;
                                     for (auto i = 0; i < 3; ++i) {
@@ -3379,7 +3858,21 @@ namespace parser {
                                         props_stack.pop();
                                     }
                                     generator.push(4,
-                                            reduction(10, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                            reduction(13, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            case 42:
+                                {
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 1; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(2,
+                                            reduction(4, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
@@ -3392,40 +3885,12 @@ namespace parser {
                                         state_stack.pop();
                                         props_stack.pop();
                                     }
-                                    generator.push(4,
-                                            reduction(12, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                    generator.push(1,
+                                            reduction(7, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
                             case 44:
-                                {
-                                    std::list<Props> tmp;
-                                    for (auto i = 0; i < 1; ++i) {
-                                        auto &item = props_stack.top();
-                                        tmp.push_front(std::move(item));
-                                        state_stack.pop();
-                                        props_stack.pop();
-                                    }
-                                    generator.push(3,
-                                            reduction(1, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
-                                                    std::move_iterator<iter_t>(tmp.end()))));
-                                    break;
-                                }
-                            case 45:
-                                {
-                                    std::list<Props> tmp;
-                                    for (auto i = 0; i < 3; ++i) {
-                                        auto &item = props_stack.top();
-                                        tmp.push_front(std::move(item));
-                                        state_stack.pop();
-                                        props_stack.pop();
-                                    }
-                                    generator.push(1,
-                                            reduction(8, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
-                                                    std::move_iterator<iter_t>(tmp.end()))));
-                                    break;
-                                }
-                            case 46:
                                 {
                                     std::list<Props> tmp;
                                     for (auto i = 0; i < 3; ++i) {
@@ -3439,7 +3904,37 @@ namespace parser {
                                                     std::move_iterator<iter_t>(tmp.end()))));
                                     break;
                                 }
+                            case 47:
+                                {
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 4; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(4,
+                                            reduction(9, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            case 49:
+                                {
+                                    std::list<Props> tmp;
+                                    for (auto i = 0; i < 4; ++i) {
+                                        auto &item = props_stack.top();
+                                        tmp.push_front(std::move(item));
+                                        state_stack.pop();
+                                        props_stack.pop();
+                                    }
+                                    generator.push(4,
+                                            reduction(9, std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),
+                                                    std::move_iterator<iter_t>(tmp.end()))));
+                                    break;
+                                }
+                            default: throw std::runtime_error("unexpected state type " + std::to_string(state_stack.top()));
                         }
+                        break;
                     }
             }
         }
