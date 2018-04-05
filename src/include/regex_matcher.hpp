@@ -89,19 +89,19 @@ namespace parser {
                 }
             }
             if (progress.empty()) throw no_match_error(_data.substr(_cur_pos));
-            decltype(progress.begin()) max_iter;
-            size_t max_priority = std::numeric_limits<size_t>::min();
+            decltype(progress.begin()) min_iter;
+            size_t min_priority = std::numeric_limits<size_t>::max();
             for (auto iter = progress.begin(); iter != progress.end(); ++iter) {
                 auto f = _token_type_info.find(iter->first);
                 if (f == _token_type_info.end()) continue;
-                if (max_priority < f->second) {
-                    max_priority = f->second;
-                    max_iter = iter;
+                if (min_priority > f->second) {
+                    min_priority = f->second;
+                    min_iter = iter;
                 }
             }
             _prev_pos = _cur_pos;
-            _cur_pos = max_iter->second;
-            return MatchText(max_iter->first, _data.substr(_prev_pos, _cur_pos));
+            _cur_pos = min_iter->second;
+            return MatchText(min_iter->first, _data.substr(_prev_pos, _cur_pos));
         }
     };
 
