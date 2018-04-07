@@ -248,8 +248,8 @@ namespace parser {
                      // T -> M T
             case 5:
                      {
-                         lexer_graph ret(std::move(lst.front().graph));
-                         auto ed = ret.get_end();
+                         auto ed = lst.front().graph.get_end();
+                         lexer_graph ret(std::move(lst.front().graph), lst.front().graph.get_start(), lst.back().graph.get_end());
                          ed->add_connection(lst.back().graph.get_start());
                          ret.combine(std::move(lst.back().graph));
                          return ret;

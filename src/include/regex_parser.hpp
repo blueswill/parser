@@ -30,7 +30,7 @@ namespace parser {
                 bool is_single() { return type == SINGLE; }
                 friend bool operator<(const unit &u1, const unit &u2) {
                     if (u1.type != u2.type) return u1.type < u2.type;
-                    bool flag = u1.less(u1.rgion.first, u2.region.first);
+                    bool flag = u1.less(u1.region.first, u2.region.first);
                     if (u1.type == SINGLE || flag) return flag;
                     return u1.less(u1.region.second, u2.region.second);
                 }
@@ -43,11 +43,11 @@ namespace parser {
             std::set<unit> set;
             Less less;
 
-            bool item_equal(const T &t1, const T &t2) {
+            bool item_equal(const T &t1, const T &t2) const {
                 return (!less(t1, t2) && !less(t2, t1));
             }
             
-            bool item_in_region(const T &t1, const T &t2, const T &target) {
+            bool item_in_region(const T &t1, const T &t2, const T &target) const {
                 return (!less(target, t1) && !less(t2, target));
             }
 
@@ -87,12 +87,12 @@ namespace parser {
 
             void add_set(const T &ch) {
                 if (type != SET) throw std::runtime_error("expected SET property");
-                set.insert(ch);
+                set.insert(unit(ch, less));
             }
 
             void add_set(const T &t1, const T &t2) {
                 if (type != SET) throw std::runtime_error("expected SET property");
-                set.insert(unit(t1, t2));
+                set.insert(unit(t1, t2, less));
             }
 
             friend bool operator<(const basic_regex_token<T, Less> &t1, const basic_regex_token<T, Less> &t2) {
@@ -170,8 +170,10 @@ namespace parser {
 
     public:
         lexer_graph() = default;
-        lexer_graph(lexer_graph &&graph) :
-            _meta(std::move(graph._meta)), _start(graph._start), _end(graph._end) {}
+        lexer_graph(lexer_graph &&graph, const node_type &start = NULL, const node_type &end = NULL) :
+            _meta(std::move(graph._meta)),
+            _start(start ? start : graph._start),
+            _end(end ? end : graph._end) {}
         lexer_graph &operator=(lexer_graph &&graph) {
             _meta = std::move(graph._meta);
             _start = std::move(graph._start);
