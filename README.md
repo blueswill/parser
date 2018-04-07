@@ -35,7 +35,9 @@ regex 出现的次序作为它们的优先级. 比如 *for* 能够匹配 /for/ �
 [\<non-terminal token\> ... ]
 
 \<non-terminal token\> [\<token\> ... ]
+
 \<non-terminal token\> [\<token\> ... ]
+
 ...
     
 其中第一条产生式的 __token__ 为开始符号, 第一行中的所有 __token__ 都是非终结符, 以下产生式中出现的其他 __token__ 都视为终结符.
