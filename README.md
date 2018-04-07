@@ -13,6 +13,7 @@ regex 出现的次序作为它们的优先级. 比如 *for* 能够匹配 /for/ �
 /for/ 的结果
 
 * simple regex rules
+
 | 符号 | 意义 |
 | --- | --- |
 | (c) | 用括号来强制优先级 |
@@ -30,6 +31,7 @@ regex 出现的次序作为它们的优先级. 比如 *for* 能够匹配 /for/ �
 ## 语法说明
 
 * 格式
+
 [\<non-terminal token\> ... ]
 
 \<token\> [\<token\> ... ]
