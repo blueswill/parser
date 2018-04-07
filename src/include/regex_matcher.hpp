@@ -43,8 +43,8 @@ namespace parser {
             _graphs(std::move(builder._graphs)),
             _token_type_info(std::move(builder._token_type_info)),
             _graph_info(std::move(builder._graph_info)),
-            _data(), _cur_pos(0), _prev_pos(0),
-            _hasher(std::move(builder._hasher)) {}
+            _hasher(std::move(builder._hasher)),
+            _data(), _cur_pos(0), _prev_pos(0) {}
     public:
         class MatchText {
         private:
@@ -56,12 +56,15 @@ namespace parser {
             TokenType get_type() const { return _type; }
             std::string get_text() const { return _text; }
         };
-        void set_source(const std::string &data) { _data = data; }
+        void set_source(const std::string &data) {
+            _data = data;
+            _cur_pos = _prev_pos = 0;
+        }
 
         MatchText next_match() {
             if (_cur_pos == _data.size()) throw no_match_error();
             // token -> forward steps
-            std::unordered_map<TokenType, size_type, Hasher> progress(_hasher);
+            std::unordered_map<TokenType, size_type, Hasher> progress(100, _hasher);
             // item : {node, next position}
             std::queue<std::pair<node_type, size_type>> handle_q;
             for (auto &node : _graphs) {
@@ -125,9 +128,6 @@ namespace parser {
             starter.insert(graph.get_start());
             closure(starter);
             meta.insert({starter, {g.get_start(), false}});
-            if (starter.find(graph.get_end()) != starter.end())
-                *inserter = g.get_start();
-
             std::queue<std::set<node_type>> q;
             q.push(std::move(starter));
 
@@ -147,6 +147,7 @@ namespace parser {
                     auto f = meta.find(item.second);
                     if (f == meta.end()) {
                         f = meta.insert({item.second, {g.get_new_node(), false}}).first;
+                        q.push(item.second);
                     }
                     des = f->second.first;
                     cur_node->add_connection(des, item.first);
@@ -189,13 +190,13 @@ namespace parser {
 
         public:
         matcher_builder(const Hasher hasher = std::hash<TokenType>()) :
-            _token_type_info(hasher), _hasher(hasher) {}
+            _token_type_info(100, hasher), _hasher(hasher) {}
 
         bool register_token(const TokenType &token, lexer_graph &&graph, size_t priority) {
             // check whether there is an existing token
             if (_token_type_info.insert({token, priority}).second == false) return false;
             std::vector<node_type> end_nodes;
-            simplify(graph, std::back_inserter(end_nodes));
+            simplify(std::move(graph), std::back_inserter(end_nodes));
             for (auto item : end_nodes) {
                 _graph_info.insert({item, token});
             }
@@ -203,7 +204,7 @@ namespace parser {
         }
 
         matcher<TokenType, Hasher> get_matcher() {
-            return matcher(*this);
+            return matcher<TokenType, Hasher>(std::move(*this));
         }
     };
 }
