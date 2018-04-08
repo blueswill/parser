@@ -104,7 +104,7 @@ namespace parser {
             }
             _prev_pos = _cur_pos;
             _cur_pos = min_iter->second;
-            return MatchText(min_iter->first, _data.substr(_prev_pos, _cur_pos));
+            return MatchText(min_iter->first, _data.substr(_prev_pos, _cur_pos - _prev_pos));
         }
     };
 
