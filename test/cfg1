@@ -1,0 +1,48 @@
+ST statements statement whiles fors ifs functions expression args-lists args-list Q P K E T S returns expressions-list expression-list
+ST statements
+ST
+statements statements statement
+statements statement
+statement whiles
+statement fors
+statement expression ;
+statement ifs
+statement functions
+statement returns ;
+whiles while \( expression \) { statements }
+fors for \( expression ; expression ; expression \) { statements }
+ifs if \( expression \) { statements }
+ifs if \( expression \) { statements } else { statements }
+functions function identifier \( args-lists \) { statements }
+expression identifier = expression
+expression Q \|\| expression
+expression Q
+Q P && P
+Q P
+P E == P
+P E > P
+P E < P
+P E
+E K \+ E
+E K - E
+E K
+K S \* K
+K S / K
+K S
+S T % S
+S T
+T - T
+T ! T
+T constant
+T identifier
+T \( expression \)
+T identifier \( expressions-list \)
+args-lists args-list
+args-lists
+args-list args-list , identifier
+args-list identifier
+returns return expression
+expressions-list expression-list
+expressions-list
+expression-list expression-list , expression
+expression-list expression

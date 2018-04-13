@@ -5,14 +5,12 @@
 #include<stdexcept>
 #include<deque>
 
-/* regular expression lexer
- */
-
 namespace parser {
     class pattern_error : public std::runtime_error {
     public:
         pattern_error(const char *str) : std::runtime_error(str) {}
     };
+
     struct lexer_token {
         enum LEXER_TYPE {
             SPLIT,      // |
@@ -35,17 +33,15 @@ namespace parser {
         lexer_token(char ch) : type(CHAR), ch(ch) {}
         lexer_token(LEXER_TYPE type) : type(type) {}
         lexer_token() = default;
-#ifdef DEBUG
         explicit operator std::string() const;
-#endif
     };
     class lexer {
     private:
         // to check whether in [] unit
         // in [] unit only -  and ^ has special meaning
         enum STATE { OUT_B, FIRST_B, IN_B };
-        STATE state = OUT_B;
 
+        STATE state = OUT_B;
         std::string inner;
         std::string::size_type cur;
         lexer_token cur_token;
@@ -61,7 +57,6 @@ namespace parser {
             inner(begin, end), cur(0) {
             read_next();
         }
-
         lexer_token consume() {
             auto ret = cur_token;
             read_next();

@@ -19,24 +19,24 @@ namespace parser {
             return t1.name == t2.name && t1.type == t2.type;
         }
         //two special terminal token \epsilon and $
-        static bool is_end(const Token &tk);
-        static bool is_null(const Token &tk);
+        static bool is_end(const Token &tk) { return tk.name == end_val; }
+        static bool is_null(const Token &tk) { return tk.name == null_val; }
+        static Token get_end() { return Token(end_val); }
+        static Token get_null() { return Token(null_val); }
 
         bool is_end() const { return is_end(*this); }
         bool is_null() const { return is_null(*this); }
         bool is_terminal() const { return type == TERM; }
-        static Token get_end();
-        static Token get_null();
+        std::string get_name() const { return name; }
+
         Token() : type(TERM), name(null_val) {}
         Token(const std::string &name, bool isterminal = true) :
             type(isterminal ? TERM : NON_TERM), name(name) {}
+        Token(const Token &tk) : type(tk.type), name(tk.name) {}
 
-        friend class CFG;
         friend struct std::hash<Token>;
 
-#ifdef DEBUG
         friend std::ostream &operator<<(std::ostream &os, const Token &tk);
-#endif
         friend bool operator<(const Token &t1, const Token &t2) {
             return t1.name < t2.name || (t1.name == t2.name && t1.type < t2.type);
         }
@@ -45,10 +45,8 @@ namespace parser {
         TYPE type;
         std::string name;
 
-        static std::string end_val;
-        static std::string null_val;
-    private:
-        friend class cfg;
+        const static std::string end_val;
+        const static std::string null_val;
     };
 }
 
@@ -68,7 +66,6 @@ namespace parser {
     private:
         std::unordered_set<Token> nonterminal_list, terminal_list;
         std::unordered_multimap<Token, std::vector<Token>> rule_list;
-
         std::unordered_map<Token, std::unordered_set<Token>> first_set;
         Token starter, extended;
 
@@ -78,18 +75,17 @@ namespace parser {
 
         friend class cfg_builder;
         friend class LR_graph;
-        friend class cfg_reduction;
     public:
         typedef decltype(rule_list.cbegin()) RULE;
-        //string pointer can't be exposed to user
-        std::unordered_set<Token> get_first_set(const Token &tk) const;
 
-        inline std::unordered_set<Token> get_terminal_tokens() const {
+        std::unordered_set<Token> get_first_set(const Token &tk) const;
+        inline const std::unordered_set<Token> &get_terminal_tokens() const {
             return terminal_list;
         }
-        inline std::unordered_set<Token> get_nonterminal_tokens() const {
+        inline const std::unordered_set<Token> &get_nonterminal_tokens() const {
             return nonterminal_list;
         }
+        inline bool contain(const Token &token) const;
         std::vector<RULE> get_rules() const {
             std::vector<RULE> ret;
             for (auto iter = rule_list.cbegin(); iter != rule_list.cend(); ++iter) {
@@ -97,40 +93,32 @@ namespace parser {
             }
             return ret;
         }
-        inline bool contain(const Token &token) const;
+        Token get_extended_token() const { return extended; }
         LR_graph get_LR_graph() const;
-#ifdef DEBUG
-        explicit operator std::string() const;
-#endif
-        inline Token get_extended_token() const { return extended; }
+
+        friend std::ostream &operator<<(std::ostream &os, const cfg &c);
     };
 
     class cfg_builder {
     private:
         cfg inner;
         Token starter;
-        void read_nonterminal_list(const std::string &line);
-        //only operator>>() function can set nonterminal token list
-        void add_nonterminal(const std::vector<std::string> &lst);
 
-        //{token_name, is_terminal}
         Token get_token(const std::string &token,  bool throw_when_terminal = false);
-        bool add_rule(const Token &head, const std::vector<Token> &body);
-        bool add_empty_rule(const Token &token);
     public:
         cfg_builder() = default;
         cfg get_cfg();
-
-        friend std::istream& operator>>(std::istream &is, cfg_builder &builder);
+        bool add_rule(const Token &head, const std::vector<Token> &body);
+        bool add_empty_rule(const Token &token);
+        template<typename InputIter>
+        void add_nonterminal_tokens(InputIter begin, InputIter end) {
+            inner.nonterminal_list.insert(begin, end);
+        }
+        void set_starter(const Token &token) { starter = token; }
     };
 
-    std::istream& operator>>(std::istream &is, cfg_builder &builder);
-
     bool operator<(const cfg::RULE &r1, const cfg::RULE &r2);
-
-#ifdef DEBUG
     std::ostream &operator<<(std::ostream &os, const cfg::RULE &rule);
-#endif
 }
 
 #endif

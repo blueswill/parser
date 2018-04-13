@@ -1,26 +1,37 @@
-#include"cfg_reduction.hpp"
 #include<iostream>
 #include<map>
-#include<sstream>
 #include<queue>
+#include<stdexcept>
+
+#include"cfg_reduction.hpp"
+#include"cfg.hpp"
+#include"cfg_graph.hpp"
 
 namespace parser {
 
     LR_reduction::reduction_type::reduction_type(const reduction_type &red) :
-        type(red.type) {
-            switch (type) {
-                case TRANSFORM: info.state = red.info.state; break;
-                case REDUCTION: info.reduction = red.info.reduction; break;
-                default: break;
-            }
+        _type(red._type) {
+        switch (_type) {
+        case TRANSFORM: _state = red._state; break;
+        case REDUCTION: _rule = red._rule; break;
+        default: break;
         }
+    }
+
+    LR_reduction::reduction_type LR_reduction::next_state(const state_type &state, const Token &tk) const {
+        auto iter = _table.find(state);
+        if (iter == _table.end()) return reduction_type(reduction_type::ERR);
+        auto f = iter->second.find(tk);
+        if (f == iter->second.end()) return reduction_type(reduction_type::ERR);
+        return f->second;
+    }
 
     LR_reduction::LR_reduction(const LR_graph &graph) {
         for (auto item : graph.inner.get_rules()) {
-            rule_mp.insert({item, rule_mp.size()});
+            _rule_mp.insert({item, _rule_mp.size()});
         }
 
-#ifdef DEBUG
+#ifdef CODE_GENERATE
         //generate goto table information
         auto non_list = graph.inner.get_nonterminal_tokens();
         for (auto item : non_list) {
@@ -38,12 +49,12 @@ namespace parser {
             if (iter->second.second == true) continue;
             iter->second.second = true;
             auto mp = graph.graph.find(cur);
-            auto inserter = table.insert({iter->second.first, {}}).first;
+            auto inserter = _table.insert({iter->second.first, {}}).first;
             for (auto item : mp->second) {
                 q.push(item.second);
                 auto next = meta.insert({item.second, {meta.size(), false}}).first;
                 inserter->second.insert({item.first, reduction_type(next->second.first)});
-#ifdef DEBUG
+#ifdef CODE_GENERATE
                 g_meta[item.first].push_back({iter->second.first, reduction_type(next->second.first)});
                 //generate goto table
                 if (!item.first.is_terminal()) {
@@ -54,70 +65,70 @@ namespace parser {
             for (auto item : cur->reduction_list()) {
                 if (item.second->first == graph.inner.get_extended_token()) {
                     if (inserter->second.insert({item.first, reduction_type(reduction_type::ACCEPT)}).second == false) {
-                        contain_conflict = true; //contain move and reduction conflict
+                        _contain_conflict = true; //contain move and reduction conflict
                     }
-#ifdef DEBUG
+#ifdef CODE_GENERATE
                     g_meta[item.first].push_back({iter->second.first, reduction_type(reduction_type::ACCEPT)});
 #endif
                     continue; //don't need to reduct if accepted
                 }
+                //std::cout << "DEBUG: " << inserter->first << " " << item.second << std::endl;
                 inserter->second.insert({item.first, reduction_type(item.second)});
-#ifdef DEBUG
+#ifdef CODE_GENERATE
                 g_meta[item.first].push_back({iter->second.first, reduction_type(item.second)});
 #endif
             }
         }
         for (auto item : meta) {
-            this->meta.insert({item.second.first, item.first});
+            this->_state_meta_info.insert({item.second.first, item.first});
         }
+        //std::cout << std::string(*this) << std::endl;
     }
 
-#ifdef DEBUG
-    LR_reduction::operator std::string() const {
-        std::ostringstream os;
-        for (auto trs : table) {
+    std::ostream &operator<<(std::ostream &os, const LR_reduction &r) {
+        for (auto trs : r._table) {
             for (auto item : trs.second) {
-                switch (item.second.type) {
-                    case reduction_type::TRANSFORM:
-                        os << trs.first << " -> " << item.second.info.state
-                            << " : " << item.first << std::endl;
-                        break;
-                    case reduction_type::REDUCTION:
-                        os << trs.first << " reduct with " << item.second.info.reduction.rule
-                            << " at " << item.first << std::endl;
-                        break;
-                    case reduction_type::ACCEPT:
-                        os << trs.first << " accept with " << item.first << std::endl;
-                        break;
-                    default:
-                        break;
+                switch (item.second.get_type()) {
+                case LR_reduction::reduction_type::TRANSFORM:
+                    os << trs.first << " -> " << item.second.get_state()
+                       << " : " << item.first << std::endl;
+                    break;
+                case LR_reduction::reduction_type::REDUCTION:
+                    os << trs.first << " reduct with " << item.second.get_rule()
+                       << " at " << item.first << std::endl;
+                    break;
+                case LR_reduction::reduction_type::ACCEPT:
+                    os << trs.first << " accept with " << item.first << std::endl;
+                    break;
+                default:
+                    break;
                 }
             }
         }
-
-        for (auto item : meta) {
+        for (auto item : r._state_meta_info) {
             os << std::endl;
             os << item.first << ": \n";
-            os << std::string(*item.second) << std::endl;
+            os << *item.second << std::endl;
         }
-        return os.str();
+        return os;
     }
 
+#ifdef CODE_GENERATE
     std::string LR_reduction::generate_code() {
         std::map<Token, std::string> mp {
             {Token("|"), "SPLIT"},
-                {Token("^"), "NOT"},
-                {Token("("), "LEFT_P"},
-                {Token(")"), "RIGHT_P"},
-                {Token("["), "LEFT_B"},
-                {Token("]"), "RIGHT_B"},
-                {Token("*"), "ZERO_MORE"},
-                {Token("+"), "ONE_MORE"},
-                {Token("?"), "ZERO_ONE"},
-                {Token("."), "ANY"},
-                {Token("c"), "CHAR"},
-                {Token("-"), "REGION"},
-                {Token::get_end(), "END_TEXT"}
+            {Token("^"), "NOT"},
+            {Token("("), "LEFT_P"},
+            {Token(")"), "RIGHT_P"},
+            {Token("["), "LEFT_B"},
+            {Token("]"), "RIGHT_B"},
+            {Token("*"), "ZERO_MORE"},
+            {Token("+"), "ONE_MORE"},
+            {Token("?"), "ZERO_ONE"},
+            {Token("."), "ANY"},
+            {Token("c"), "CHAR"},
+            {Token("-"), "REGION"},
+            {Token::get_end(), "END_TEXT"}
         };
         std::ostringstream os;
 
@@ -142,9 +153,9 @@ namespace parser {
                 auto tk = item.first->second[i];
                 os << " &&\n(";
                 if (tk.is_terminal())
-                    os << "lst[" << i << "].is_token() && lst[" << i << "].token.type == lexer_token::" << mp[tk];
+                os << "lst[" << i << "].is_token() && lst[" << i << "].token.type == lexer_token::" << mp[tk];
                 else
-                    os << "!lst[" << i << "].is_token() && lst[" << i << "].non_terminal_index == " << non_terminal_list[tk];
+                os << "!lst[" << i << "].is_token() && lst[" << i << "].non_terminal_index == " << non_terminal_list[tk];
                 os << ")";
             }
             os << ";\nbreak;\n";
@@ -192,39 +203,39 @@ namespace parser {
             for (auto action : actions) {
                 os << "case " << action.first << ":\n{\n";
                 switch (action.second.type) {
-                    case reduction_type::TRANSFORM:
-                        {
-                            os << "state_stack.push(" << action.second.info.state << ");\n";
-                            os << "props_stack.push(std::move(current));\n";
-                            os << "generator.consume();\n";
-                            break;
-                        }
-                    case reduction_type::REDUCTION:
-                        {
-                            auto size = action.second.info.reduction.rule->second.size();
-                            os << "std::list<Props> tmp;\n";
-                            //TODO if there is some empty rules, following code is wrong
-                            os << "for (auto i = 0; i < " << size << "; ++i) {\n";
-                            os << "auto &item = props_stack.top();\n";
-                            os << "tmp.push_front(std::move(item));\n";
-                            os << "state_stack.pop();\n";
-                            os << "props_stack.pop();\n";
-                            os << "}\n";
-                            os << "generator.push(";
-                            os << non_terminal_list[action.second.info.reduction.rule->first] << ",\n";
-                            os << "reduction(";
-                            os << rule_mp[action.second.info.reduction.rule];
-                            os << ", std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),\nstd::move_iterator<iter_t>(tmp.end()))));\n";
-                            break;
-                        }
-                    case reduction_type::ACCEPT:
-                        {
-                            os << "auto result = std::move(props_stack.top());\n";
-                            os << "return std::move(result.graph);\n";
-                            break;
-                        }
-                    default:
-                        break;
+                case reduction_type::TRANSFORM:
+                {
+                    os << "state_stack.push(" << action.second.info.state << ");\n";
+                    os << "props_stack.push(std::move(current));\n";
+                    os << "generator.consume();\n";
+                    break;
+                }
+                case reduction_type::REDUCTION:
+                {
+                    auto size = action.second.info.reduction.rule->second.size();
+                    os << "std::list<Props> tmp;\n";
+                    //TODO if there is some empty rules, following code is wrong
+                    os << "for (auto i = 0; i < " << size << "; ++i) {\n";
+                    os << "auto &item = props_stack.top();\n";
+                    os << "tmp.push_front(std::move(item));\n";
+                    os << "state_stack.pop();\n";
+                    os << "props_stack.pop();\n";
+                    os << "}\n";
+                    os << "generator.push(";
+                    os << non_terminal_list[action.second.info.reduction.rule->first] << ",\n";
+                    os << "reduction(";
+                    os << rule_mp[action.second.info.reduction.rule];
+                    os << ", std::vector<Props>(std::move_iterator<iter_t>(tmp.begin()),\nstd::move_iterator<iter_t>(tmp.end()))));\n";
+                    break;
+                }
+                case reduction_type::ACCEPT:
+                {
+                    os << "auto result = std::move(props_stack.top());\n";
+                    os << "return std::move(result.graph);\n";
+                    break;
+                }
+                default:
+                    break;
                 }
                 os << "break;\n";
                 os << "}\n";

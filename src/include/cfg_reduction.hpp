@@ -1,8 +1,9 @@
 #ifndef CFG_REDUCTION_HPP
 #define CFG_REDUCTION_HPP
 
-#include"cfg_graph.hpp"
 #include<iosfwd>
+
+#include"cfg_graph.hpp"
 
 namespace parser {
     class LR_reduction {
@@ -10,56 +11,44 @@ namespace parser {
     private:
         typedef ssize_t state_type;
     public:
-        struct reduction_type {
-            enum TYPE { TRANSFORM, REDUCTION, ERR, ACCEPT};
-            struct INFO {
-                state_type state;
-                struct reduction {
-                    cfg::RULE rule;
-                    reduction(const cfg::RULE &rule) :
-                        rule(rule) {}
-                    reduction() = default;
-                } reduction;
-
-                INFO(const state_type &st) : state(st) {}
-                INFO(const cfg::RULE &rule) :
-                    reduction(rule) {}
-                INFO() {}
-                ~INFO() {}
-            };
-            TYPE type;
-            INFO info;
+        class reduction_type {
+        public:
+            enum TYPE { TRANSFORM, REDUCTION, ACCEPT, ERR };
+        private:
+            TYPE _type;
+            state_type _state;
+            cfg::RULE _rule;
+        public:
             reduction_type(const state_type &state) :
-                type(TRANSFORM), info(state) {}
+                _type(TRANSFORM), _state(state) {}
             reduction_type(const cfg::RULE &rule) :
-                type(REDUCTION), info(rule) {}
-            reduction_type(TYPE type = ERR) :
-                type(type) {}
+                _type(REDUCTION), _rule(rule) {}
+            reduction_type(TYPE type = ACCEPT) : _type(type) {}
             reduction_type(const reduction_type &red);
+            TYPE get_type() const { return _type; }
+            state_type get_state() const { return _state; }
+            cfg::RULE get_rule() const { return _rule; }
         };
 
-        reduction_type next_state(const state_type &state, const Token &tk);
-#ifdef DEBUG
-        explicit operator std::string() const;
-        std::string generate_code();
-        bool conflict() { return contain_conflict; }
-#endif
+        reduction_type next_state(const state_type &state, const Token &tk) const;
+        bool conflict() { return _contain_conflict; }
+        friend std::ostream &operator<<(std::ostream &os, const LR_reduction &r);
     private:
-        std::unordered_map<state_type, std::unordered_map<Token, reduction_type>> table;
-        std::map<state_type, LR_graph::node_type> meta;
-        state_type init;
-        //移进归约冲突
-        bool contain_conflict = false;
-
-#ifdef DEBUG
+        std::unordered_map<state_type, std::unordered_map<Token, reduction_type>> _table;
+        std::map<state_type, LR_graph::node_type> _state_meta_info;
+        state_type _init_state;
+        //save rule index
+        std::map<cfg::RULE, size_t> _rule_mp;
+        //move/reduct conflict
+        bool _contain_conflict = false;
+        LR_reduction(const LR_graph &graph);
+#ifdef CODE_GENERATE
         std::map<Token, std::vector<std::pair<state_type, reduction_type>>> g_meta;
         std::map<Token, size_t> non_terminal_list;
         std::map<size_t, std::vector<std::pair<state_type, state_type>>> goto_table;
+    public:
+        std::string generate_code();
 #endif
-        //save rule index
-        std::map<cfg::RULE, size_t> rule_mp;
-
-        LR_reduction(const LR_graph &graph);
     };
 }
 

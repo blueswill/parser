@@ -1,26 +1,24 @@
-#include"cfg_graph.hpp"
 #include<queue>
-#include<sstream>
-#include"cfg_reduction.hpp"
 #include<iostream>
 
+#include"cfg_graph.hpp"
+#include"cfg_reduction.hpp"
+#include"cfg.hpp"
+
 namespace parser {
-#ifdef DEBUG
-    LR_graph::Data::Item::operator std::string() const {
-        std::ostringstream os;
-        os << rule->first << " ->";
-        for (auto i = 0ul; i < rule->second.size(); ++i) {
-            if (i == dot_pos) {
+    std::ostream &operator<<(std::ostream &os, const LR_graph::Data::Item &d) {
+        os << d.rule->first << " ->";
+        for (auto i = 0ul; i < d.rule->second.size(); ++i) {
+            if (i == d.dot_pos) {
                 os << " *";
             }
-            os << ' ' << rule->second[i];
+            os << ' ' << d.rule->second[i];
         }
-        if (dot_pos == rule->second.size()) {
+        if (d.dot_pos == d.rule->second.size()) {
             os << " *";
         }
-        return os.str();
+        return os;
     }
-#endif
 
     std::size_t LR_graph::Data::hasher::operator()(const Item &t1) const {
         size_t seed = t1.rule->second.size() + t1.dot_pos;
@@ -74,27 +72,25 @@ namespace parser {
         std::map<Token, cfg::RULE> ret;
         for (auto item : item_list) {
             if (item.first.rule->second.size() > item.first.dot_pos)
-                continue;
+            continue;
             for (auto tk : item.second) {
+                //std::cout << item.first.rule << std::endl;
                 ret.insert({tk, item.first.rule});
             }
         }
         return ret;
     }
 
-#ifdef DEBUG
-    LR_graph::Data::operator std::string() const {
-        std::ostringstream os;
-        for (auto item : item_list) {
-            os << std::string(item.first) << "\t";
+    std::ostream &operator<<(std::ostream &os, const LR_graph::Data &d) {
+        for (auto item : d.item_list) {
+            os << item.first << "\t";
             for (auto token : item.second) {
                 os << token << ' ';
             }
             os << "\n";
         }
-        return os.str();
+        return os;
     }
-#endif
 
     size_t LR_graph::hasher::operator()(const Data &t) const {
         size_t seed = t.item_list.size();
@@ -166,11 +162,11 @@ namespace parser {
             }
             auto item = cur.first;
             if (item.dot_pos < item.rule->second.size() &&
-                    !item.rule->second[item.dot_pos].is_terminal()) {
+                !item.rule->second[item.dot_pos].is_terminal()) {
                 auto rules = inner.rule_list.equal_range(item.rule->second[item.dot_pos]);
                 auto follows = compute_follows(item.rule->second.begin() + item.dot_pos + 1, item.rule->second.end());
                 if (follows.empty() ||
-                        follows.find(Token::get_null()) != follows.end()) {
+                    follows.find(Token::get_null()) != follows.end()) {
                     follows.erase(Token::get_null());
                     follows.insert(cur.second);
                 }
@@ -193,7 +189,7 @@ namespace parser {
         Data ret;
         for (auto item : data.item_list) {
             if (item.first.rule->second.size() > item.first.dot_pos &&
-                    item.first.rule->second[item.first.dot_pos] == trans) {
+                item.first.rule->second[item.first.dot_pos] == trans) {
                 ret.add_rule(Data::Item(item.first.rule, item.first.dot_pos + 1), item.second.begin(), item.second.end());
             }
         }
@@ -241,16 +237,13 @@ namespace parser {
         return LR_reduction(*this);
     }
 
-#ifdef DEBUG
-    LR_graph::operator std::string() const {
-        std::map<node_type, int> nodes;
-        std::ostringstream os;
-        for (const auto &item : meta) {
+    std::ostream &operator<<(std::ostream &os, const LR_graph &g) {
+        std::map<LR_graph::node_type, int> nodes;
+        for (const auto &item : g.meta) {
             auto iter = nodes.insert({item.second.get(), nodes.size()});
             os << iter.first->second << std::endl;
-            os << std::string(item.first) << std::endl;
+            os << item.first << std::endl;
         }
-        return os.str();
+        return os;
     }
-#endif
 }
