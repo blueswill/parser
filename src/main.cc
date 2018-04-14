@@ -1,12 +1,9 @@
-#ifndef DEBUG
-#define DEBUG
-#endif
 #include<iostream>
 #include<sstream>
 #include<fstream>
 #include<algorithm>
 #include<vector>
-#include<deque>
+
 #include"regex_parser.hpp"
 #include"regex_matcher.hpp"
 #include"cfg.hpp"
