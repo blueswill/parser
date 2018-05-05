@@ -105,7 +105,12 @@ namespace parser {
     }
 
     //thanks for https://github.com/kartikkukreja/blog-codes/blob/master/src/FIRST%20set%20of%20each%20variable%20in%20a%20CFG.cpp
+    /* first_set: 非终结符 -> 对应first集 */
     void cfg::compute_first_set() {
+        /* 初始化first_set:
+         * 将产生式左部开头的终结符放入对应first_set中
+         * 否则置空
+         */
         for (auto rule : rule_list) {
             if (rule.second.front().is_terminal()) {
                 first_set[rule.first].insert(rule.second.front());
@@ -119,9 +124,14 @@ namespace parser {
         while (!complete) {
             complete = true;
             for (auto rule : rule_list) {
+                /* 指向当前产生式对应的非终结符 */
                 auto iter = first_set.find(rule.first);
                 auto prev_size = iter->second.size();
+                /* 当前集合中若有null, 遍历结束后便不须额外删除null */
                 bool contain_null = (iter->second.find(Token::get_null()) != iter->second.end());
+                /* 遍历当前产生式右部符号, 将遇到的每一个非终结符的first集并入iter
+                 * 结束条件: 遍历到最后(添加null)/遇到第一个first集中不含null的非终结符/遇到第一个终结符
+                 */
                 auto b_iter = rule.second.begin();
                 for (; b_iter != rule.second.end(); ++b_iter) {
                     Token &token = *b_iter;
@@ -132,6 +142,7 @@ namespace parser {
                     auto tmp = first_set.find(token);
                     if (tmp->second.size())
                     iter->second.insert(tmp->second.begin(), tmp->second.end());
+                    /* 并入之前已有null则无须删除null */
                     if (!contain_null && tmp->second.find(Token::get_null()) != tmp->second.end()) {
                         iter->second.erase(Token::get_null());
                         continue;
@@ -139,6 +150,7 @@ namespace parser {
                     break;
                 }
                 if (b_iter == rule.second.end()) iter->second.insert(Token::get_null());
+                /* 若当前first集合大小发生变化则需要再次对所有产生式进行遍历 */
                 if (prev_size != iter->second.size()) {
                     complete = false;
                 }
