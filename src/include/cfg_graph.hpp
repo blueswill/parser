@@ -25,7 +25,7 @@ namespace parser {
                 friend bool operator==(const Item &i1, const Item &i2) {
                     return i1.rule == i2.rule && i1.dot_pos == i2.dot_pos;
                 }
-                explicit operator std::string() const;
+                friend std::ostream &operator<<(std::ostream &os, const Item &item);
             };
 
             struct hasher {
