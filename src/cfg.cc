@@ -50,11 +50,11 @@ namespace parser {
     }
 
     inline bool cfg_builder::add_rule(const Token &head,
-                                      const std::vector<Token> &body) {
+            const std::vector<Token> &body) {
         if (!inner.contain(head)) return false;
         for (auto token : body) {
             if (!token.is_terminal() && !inner.contain(token))
-            return false;
+                return false;
         }
         inner.rule_list.insert({head, body});
         return true;
@@ -71,7 +71,7 @@ namespace parser {
             for (auto item : inner.nonterminal_list) {
                 if (inner.rule_list.find(item) == inner.rule_list.end()) {
                     throw std::runtime_error("ERROR: no producer for nonterminal token "
-                                             + item.get_name());
+                            + item.get_name());
                 }
             }
             inner.starter = starter;
@@ -86,10 +86,10 @@ namespace parser {
     }
 
     Token cfg_builder::get_token(const std::string &token,
-                                 bool throw_when_terminal) {
+            bool throw_when_terminal) {
         Token ifnonterminal(token, false);
         if (inner.nonterminal_list.find(ifnonterminal)
-            != inner.terminal_list.end()) {
+                != inner.terminal_list.end()) {
             return ifnonterminal;
         }
         if (throw_when_terminal) {
@@ -140,14 +140,12 @@ namespace parser {
                         break;
                     }
                     auto tmp = first_set.find(token);
-                    if (tmp->second.size())
                     iter->second.insert(tmp->second.begin(), tmp->second.end());
                     /* 并入之前已有null则无须删除null */
-                    if (!contain_null && tmp->second.find(Token::get_null()) != tmp->second.end()) {
+                    if (!contain_null)
                         iter->second.erase(Token::get_null());
-                        continue;
-                    }
-                    break;
+                    if (tmp->second.find(Token::get_null()) == tmp->second.end())
+                        break;
                 }
                 if (b_iter == rule.second.end()) iter->second.insert(Token::get_null());
                 /* 若当前first集合大小发生变化则需要再次对所有产生式进行遍历 */
