@@ -114,6 +114,10 @@ namespace parser {
         void add_nonterminal_tokens(InputIter begin, InputIter end) {
             inner.nonterminal_list.insert(begin, end);
         }
+        template<typename InputIter>
+        void add_terminal_tokens(InputIter begin, InputIter end) {
+            inner.terminal_list.insert(begin, end);
+        }
         void set_starter(const Token &token) { starter = token; }
     };
 

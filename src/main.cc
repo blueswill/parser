@@ -81,6 +81,10 @@ auto get_cfg(std::istream &is, parser::matcher_builder<std::string> &matcher_bui
         }
         else builder.add_empty_rule(head);
     }
+    std::vector<parser::Token> tks;
+    std::for_each(term_tokens.begin(), term_tokens.end(),
+            [&tks](const std::string &t) { tks.push_back(parser::Token(t));});
+    builder.add_terminal_tokens(tks.begin(), tks.end());
     return builder.get_cfg();
 }
 
