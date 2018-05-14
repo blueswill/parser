@@ -1,8 +1,11 @@
+#include<getopt.h>
 #include<iostream>
-#include<sstream>
+#include<memory>
 #include<fstream>
-#include<algorithm>
-#include<vector>
+#include<cerrno>
+#include<cstring>
+#include<sstream>
+#include<iomanip>
 
 #include"regex_parser.hpp"
 #include"regex_matcher.hpp"
@@ -10,7 +13,63 @@
 #include"cfg_graph.hpp"
 #include"cfg_reduction.hpp"
 
+#define TABLE_WIDTH 20
+
 std::set<std::string> term_tokens;
+
+std::string line;
+size_t line_pos = 0;
+std::vector<size_t> state_stack {0};
+std::vector<parser::Token> term_stack;
+
+struct option longopts[] = {
+    {"cfg", 1, nullptr, 'c'},
+    {"pattern", 1, nullptr, 'p'},
+    {"token", 1, nullptr, 'k'},
+    {"reduction", 1, nullptr, 'r'},
+    {"table", 1, nullptr, 't'},
+    {"help", 0, nullptr, 'h'},
+    {"file", 1, nullptr, 'f'},
+    {nullptr, 0, nullptr, 0}
+};
+
+template<typename Type>
+class Deleter {
+private:
+    bool done;
+public:
+    Deleter(bool d = true) : done(d) {}
+    void operator()(Type *ptr) {
+        if (done) delete ptr;
+    }
+};
+
+class reduction_error : public std::exception {
+private:
+    std::string _str;
+public:
+    reduction_error(const std::string &s) : _str(s) {}
+    const char *what() const noexcept override {
+        return _str.data();
+    }
+};
+
+void usage(const char *cmd_name) {
+    fprintf(stdout, "A simple parser for specified pattern definition and LR(1) grammar\n");
+    fprintf(stdout, "usage: %s [options] [-c|--cfg cfg_deffile] [-p|--pattern pattern_deffile]\n", cmd_name);
+    fprintf(stdout, "options:\n");
+    fprintf(stdout, "-f, --file=parsefile         set file to parse, necessary if -r or -k is given\n");
+    fprintf(stdout, "-t, --table=outfile          set produced reduction table output file\n");
+    fprintf(stdout, "-k, --token=outfile          set token output file\n");
+    fprintf(stdout, "-r, --reduction=outfile      set reduction result output file\n");
+    fprintf(stdout, "-h, --help                   print this help message\n");
+    exit(EXIT_SUCCESS);
+}
+
+void file_open_err(const char *file) {
+    fprintf(stderr, "%s: %s\n", file, strerror(errno));
+    exit(EXIT_FAILURE);
+}
 
 void get_matcher_info(std::istream &is, parser::matcher_builder<std::string> &matcher_builder) {
     std::string line;
@@ -88,27 +147,16 @@ auto get_cfg(std::istream &is, parser::matcher_builder<std::string> &matcher_bui
     return builder.get_cfg();
 }
 
-std::string line;
-size_t line_pos = 0;
-std::vector<size_t> state_stack {0};
-std::vector<parser::Token> term_stack;
-
-class reduction_error : public std::exception {
-private:
-    std::string _str;
-public:
-    reduction_error(const std::string &s) : _str(s) {}
-    const char *what() const noexcept override {
-        return _str.data();
-    }
-};
-
-void print_status() {
-    for (auto item : term_stack) std::cout << item << ' ';
-    std::cout << std::endl;
+void print_status(std::ostream *os) {
+    for (auto item : term_stack) os && (*os) << item << ' ';
+    os && (*os) << std::endl;
 }
 
-bool reduction(const parser::LR_reduction &reduction_table, parser::LR_reduction::reduction_type reduction, const parser::Token &tk) {
+bool reduction(
+        const parser::LR_reduction &reduction_table,
+        parser::LR_reduction::reduction_type reduction,
+        const parser::Token &tk,
+        std::ostream *os) {
     if (state_stack.empty()) throw reduction_error("state_stack empty");
     typedef decltype(reduction.get_type()) TYPE;
     while (TYPE::REDUCTION == reduction.get_type()) {
@@ -124,7 +172,7 @@ bool reduction(const parser::LR_reduction &reduction_table, parser::LR_reduction
         auto head = reduction.get_rule()->first;
         auto next = reduction_table.next_state(state_stack.back(), head);
         switch (next.get_type()) {
-            case TYPE::ACCEPT: std::cout << "ACCEPT\n"; return true;
+            case TYPE::ACCEPT: os && (*os) << "ACCEPT\n"; return true;
             case TYPE::REDUCTION:
             case TYPE::ERR: throw reduction_error("GOTO table error");
             case TYPE::TRANSFORM:
@@ -132,11 +180,11 @@ bool reduction(const parser::LR_reduction &reduction_table, parser::LR_reduction
                             term_stack.push_back(head);
                             break;
         }
-        print_status();
+        print_status(os);
         reduction = reduction_table.next_state(state_stack.back(), tk);
     }
     switch (reduction.get_type()) {
-        case TYPE::ACCEPT: std::cout << "ACCEPT\n"; return true;
+        case TYPE::ACCEPT: os && (*os) << "ACCEPT\n"; return true;
         case TYPE::ERR: throw reduction_error("ERR type");
         case TYPE::TRANSFORM:
                         state_stack.push_back(reduction.get_state());
@@ -144,26 +192,117 @@ bool reduction(const parser::LR_reduction &reduction_table, parser::LR_reduction
                         break;
         default: break;
     }
-    print_status();
+    print_status(os);
     return false;
 }
 
-int main(int argc, char **argv) {
-    if (argc != 4) {
-        std::cout << argv[0] << " <lexial definition file> <cfg definition file> <file to parse>\n";
-        return 0;
+void print_table(parser::cfg &c, parser::LR_reduction &table, std::ostream &os) {
+#define OS (os << std::setw(TABLE_WIDTH))
+    std::map<parser::cfg::RULE, size_t> rule_list;
+    auto &&rs = c.get_rules();
+    std::for_each(rs.begin(), rs.end(),
+            [&rule_list](parser::cfg::RULE r) { rule_list.insert({r, rule_list.size()});});
+    typedef parser::LR_reduction::reduction_type TYPE;
+    OS << "";
+    auto &&terms = c.get_terminal_tokens();
+    auto &&nonterms = c.get_nonterminal_tokens();
+    std::vector<parser::Token> tks;
+    std::copy(terms.begin(), terms.end(), std::back_inserter(tks));
+    tks.push_back(parser::Token::get_end());
+    std::copy(nonterms.begin(), nonterms.end(), std::back_inserter(tks));
+    for (auto &item : tks) {
+        OS << item;
     }
-    std::ifstream pattern_def(argv[1]), cfg_def(argv[2]), parse_def(argv[3]);
+    os << std::endl;
+    for (auto i = 0u; i < table.state_count(); ++i) {
+        OS << i;
+        for (auto &term : tks) {
+            auto next = table.next_state(i, term);
+            switch (next.get_type()) {
+                case TYPE::ACCEPT: OS << "accept"; break;
+                case TYPE::ERR: OS << ""; break;
+                case TYPE::REDUCTION: 
+                            OS << "r" + std::to_string(rule_list.find(next.get_rule())->second);
+                            break;
+                case TYPE::TRANSFORM: OS << "s" + std::to_string(next.get_state()); break;
+            }
+        }
+        os << std::endl;
+    }
+#ifdef OS
+#undef OS
+#endif
+}
+
+void set_in(std::unique_ptr<std::istream, Deleter<std::istream>> &f) {
+    if (std::string("-") == optarg) {
+        f = std::unique_ptr<std::istream, Deleter<std::istream>>(&std::cin, false);
+    }
+    else f = std::unique_ptr<std::istream, Deleter<std::istream>>(new std::ifstream(optarg));
+    if (!*f) {
+        std::cerr << strerror(errno) << std::endl;
+        exit(EXIT_FAILURE);
+    }
+}
+
+void set_out(std::unique_ptr<std::ostream, Deleter<std::ostream>> &f) {
+    if (std::string("-") == optarg) {
+        f = std::unique_ptr<std::ostream, Deleter<std::ostream>>(&std::cout, false);
+    }
+    else f = std::unique_ptr<std::ostream, Deleter<std::ostream>>(new std::ofstream(optarg));
+    if (!*f) {
+        std::cerr << strerror(errno) << std::endl;
+        exit(EXIT_FAILURE);
+    }
+}
+
+int main(int argc, char **argv) {
+    int optc;
+    std::unique_ptr<std::istream, Deleter<std::istream>> cfg_definition, pattern_definition, parse_file;
+    std::unique_ptr<std::ostream, Deleter<std::ostream>> table_out, token_out, reduction_out;
+    while ((optc = getopt_long(argc, argv, "c:p:k:r:t:hf:", longopts, nullptr)) != -1) {
+        switch (optc) {
+            case 'c': set_in(cfg_definition); break;
+            case 'p': set_in(pattern_definition); break;
+            case 'f': set_in(parse_file); break;
+            case 'k': set_out(token_out); break;
+            case 'r': set_out(reduction_out); break;
+            case 't': set_out(table_out); break;
+            case 'h': usage(argv[0]);
+            default:
+                fprintf(stderr, "Try '%s -h' for more information\n", argv[0]);
+                exit(EXIT_FAILURE);
+        }
+    }
+
+    if (argc != optind) {
+        fprintf(stderr, "invalid argument found\n");
+        exit(EXIT_FAILURE);
+    }
+
+    if (!cfg_definition || !pattern_definition) {
+        fprintf(stderr, "cfg or pattern is not defined\n");
+        fprintf(stderr, "Try '%s -h' for help\n", argv[0]);
+        exit(EXIT_FAILURE);
+    }
+
     parser::matcher_builder<std::string> builder;
-    get_matcher_info(pattern_def, builder);
-    auto cfg = get_cfg(cfg_def, builder);
+    get_matcher_info(*pattern_definition, builder);
+    auto cfg = get_cfg(*cfg_definition, builder);
     auto matcher = builder.get_matcher();
     auto graph = cfg.get_LR_graph();
     auto reduction_table = graph.get_reduction_table();
 
+    if (table_out)
+        print_table(cfg, reduction_table, *table_out);
+    if ((token_out || reduction_out) && !parse_file) {
+        std::cerr << "file to parse is expected\n";
+        exit(EXIT_FAILURE);
+    }
+    if (!parse_file) return 0;
     try {
-        while (std::getline(parse_def, line)) {
-            std::cout << "parse line " << line_pos << ": " << line << std::endl;
+        while (std::getline(*parse_file, line)) {
+            reduction_out && (*reduction_out) << "parse line " << line_pos << ": " << line << std::endl;
             std::string::iterator prev = line.begin();
             while (prev != line.end()) {
                 while(std::isspace(*prev)) ++prev;
@@ -175,7 +314,8 @@ int main(int argc, char **argv) {
                     parser::Token tk(*iter);
                     auto ret = reduction_table.next_state(cur_state, tk);
                     if (ret.get_type() != parser::LR_reduction::reduction_type::ERR) {
-                        reduction(reduction_table, ret, tk);
+                        reduction(reduction_table, ret, tk, reduction_out.get());
+                        token_out && (*token_out) << tk.get_name() << ": " << tk << std::endl;
                         break;
                     }
                 }
@@ -191,12 +331,12 @@ int main(int argc, char **argv) {
             if (ret.get_type() == parser::LR_reduction::reduction_type::ERR) {
                 throw reduction_error("unexpected end of file");
             }
-            if (reduction(reduction_table, ret, tk)) break;
+            if (reduction(reduction_table, ret, tk, reduction_out.get())) break;
         } while (true);
     } catch(parser::no_match_error<std::string::iterator> &e) {
-        std::cout << "lexer error at line " << line_pos << ": " << std::string(e.get_iter(), line.end()) << std::endl;
+        std::cerr << "lexer error at line " << line_pos << ": " << std::string(e.get_iter(), line.end()) << std::endl;
     } catch(reduction_error &e) {
-        std::cout << "reduction error at line " << line_pos << ": " << e.what() << std::endl;
+        std::cerr << "reduction error at line " << line_pos << ": " << e.what() << std::endl;
     }
     return 0;
 }

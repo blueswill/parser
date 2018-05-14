@@ -32,6 +32,7 @@ namespace parser {
 
         reduction_type next_state(const state_type &state, const Token &tk) const;
         bool conflict() { return _contain_conflict; }
+        size_t state_count() const { return _state_meta_info.size(); }
         friend std::ostream &operator<<(std::ostream &os, const LR_reduction &r);
     private:
         std::unordered_map<state_type, std::unordered_map<Token, reduction_type>> _table;
