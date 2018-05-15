@@ -307,21 +307,21 @@ int main(int argc, char **argv) {
             while (prev != line.end()) {
                 while(std::isspace(*prev)) ++prev;
                 auto ret = matcher.match(prev, line.end());
-                prev = ret.second;
                 auto cur_state = state_stack.back();
                 auto iter = ret.first.begin();
                 for (; iter != ret.first.end(); ++iter) {
                     parser::Token tk(*iter);
-                    auto ret = reduction_table.next_state(cur_state, tk);
-                    if (ret.get_type() != parser::LR_reduction::reduction_type::ERR) {
-                        reduction(reduction_table, ret, tk, reduction_out.get());
-                        token_out && (*token_out) << tk.get_name() << ": " << tk << std::endl;
+                    auto rn = reduction_table.next_state(cur_state, tk);
+                    if (rn.get_type() != parser::LR_reduction::reduction_type::ERR) {
+                        reduction(reduction_table, rn, tk, reduction_out.get());
+                        token_out && (*token_out) << tk << ": " << std::string(prev, ret.second) << std::endl;
                         break;
                     }
                 }
                 if (iter == ret.first.end()) {
                     throw reduction_error("unexpected token");
                 }
+                prev = ret.second;
             }
             ++line_pos;
         }
