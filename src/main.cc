@@ -292,6 +292,10 @@ int main(int argc, char **argv) {
     auto matcher = builder.get_matcher();
     auto graph = cfg.get_LR_graph();
     auto reduction_table = graph.get_reduction_table();
+    if (reduction_table.conflict()) {
+        std::cerr << "not a LR(1) grammar\n";
+        exit(EXIT_FAILURE);
+    }
 
     if (table_out)
         print_table(cfg, reduction_table, *table_out);

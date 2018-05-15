@@ -26,7 +26,9 @@ namespace parser {
         return f->second;
     }
 
-    LR_reduction::LR_reduction(const LR_graph &graph) {
+    LR_reduction::LR_reduction(const LR_graph &graph) :
+        _contain_conflict(graph.is_conflict()) {
+        if (_contain_conflict) return;
         for (auto item : graph.inner.get_rules()) {
             _rule_mp.insert({item, _rule_mp.size()});
         }
