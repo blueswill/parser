@@ -135,17 +135,6 @@ namespace parser {
     LR_graph::Data LR_graph::closure(const Data &data) const {
         Data ret;
         typedef std::pair<Data::Item, Token> Item;
-        auto hasher = [](const Item &t) {
-            auto hasher1 = Data::hasher();
-            auto hasher2 = std::hash<Token>();
-            return hasher1(t.first) ^ hasher2(t.second);
-        };
-
-        auto equal = [](const Item &t1, const Item &t2) {
-            return t1.first == t2.first && t1.second == t2.second;
-        };
-
-        std::unordered_set<Item, decltype(hasher), decltype(equal)> record(10, hasher, equal);
         std::queue<Item> q;
 
         for (auto item : data.item_list) {
