@@ -323,7 +323,7 @@ int main(int argc, char **argv) {
                     }
                 }
                 if (iter == ret.first.end()) {
-                    throw reduction_error("unexpected token");
+                    throw reduction_error("unexpected token: " + std::string(prev, line.end()));
                 }
                 prev = ret.second;
             }
